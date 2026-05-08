@@ -58,6 +58,8 @@ export function getMediumQualityImage(images) {
  */
 function stripPreviewMarker(url) {
   if (!url || typeof url !== 'string') return url;
+  
+  // Remove preview marker
   return url
     .replace(/_p\.mp4/g, '.mp4')
     .replace(/_p\.m4a/g, '.m4a')

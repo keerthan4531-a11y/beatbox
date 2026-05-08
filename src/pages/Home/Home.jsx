@@ -102,13 +102,17 @@ export default function Home() {
       for (const s of priority) {
         if (!mountedRef.current) return;
         await fetchSection(s);
+        // Small delay to prevent rate limiting
+        await new Promise(r => setTimeout(r, 300));
       }
       if (mountedRef.current) setLoading(false);
 
-      // Lazy-load the rest in parallel batches of 3
-      for (let i = 0; i < rest.length; i += 3) {
+      // Lazy-load the rest in parallel batches of 2 (smaller batches to be safe)
+      for (let i = 0; i < rest.length; i += 2) {
         if (!mountedRef.current) return;
-        await Promise.all(rest.slice(i, i + 3).map(fetchSection));
+        await Promise.all(rest.slice(i, i + 2).map(fetchSection));
+        // Delay between batches
+        await new Promise(r => setTimeout(r, 500));
       }
     }
 
@@ -121,10 +125,10 @@ export default function Home() {
   useEffect(() => {
     let mounted = true;
     async function loadCovers() {
-      for (let i = 0; i < FEATURED_PLAYLISTS.length; i += 4) {
+      for (let i = 0; i < FEATURED_PLAYLISTS.length; i += 2) {
         if (!mounted) break;
         await Promise.all(
-          FEATURED_PLAYLISTS.slice(i, i + 4).map(async (pl) => {
+          FEATURED_PLAYLISTS.slice(i, i + 2).map(async (pl) => {
             try {
               const data = await searchAlbums(pl.query, 1);
               const first = data?.results?.[0];
@@ -134,6 +138,8 @@ export default function Home() {
             } catch {}
           })
         );
+        // Delay to prevent 429
+        await new Promise(r => setTimeout(r, 400));
       }
     }
     loadCovers();
@@ -255,7 +261,7 @@ export default function Home() {
                 <div className="home__grid">
                   {sectionData.items.slice(0, 12).map((album, i) => (
                     <AlbumCard
-                      key={album.id || i}
+                      key={`${album.id || 'album'}-${i}`}
                       album={album}
                       onClick={handleAlbumClick}
                       style={{ animationDelay: `${i * 40}ms` }}
@@ -278,7 +284,7 @@ export default function Home() {
                 <div className="home__grid">
                   {sectionData.items.slice(0, 12).map((song, i) => (
                     <SongCard
-                      key={song.id}
+                      key={`${song.id || 'song'}-${i}`}
                       song={song}
                       queue={sectionData.items}
                       index={i}

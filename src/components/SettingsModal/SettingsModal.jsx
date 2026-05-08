@@ -1,6 +1,7 @@
 import React from 'react';
 import { usePlayer } from '../../context/PlayerContext';
-import { IoClose, IoCloudOfflineOutline, IoLogOutOutline, IoWarningOutline } from 'react-icons/io5';
+import { IoClose, IoCloudOfflineOutline, IoLogOutOutline, IoInformationCircleOutline } from 'react-icons/io5';
+import AboutModal from '../AboutModal/AboutModal';
 import './SettingsModal.css';
 
 export default function SettingsModal({ onClose }) {
@@ -9,6 +10,8 @@ export default function SettingsModal({ onClose }) {
     audioQuality, crossfade, gapless,
     dispatch 
   } = usePlayer();
+
+  const [showAbout, setShowAbout] = React.useState(false);
 
   const handleLogout = () => {
     logout();
@@ -121,13 +124,18 @@ export default function SettingsModal({ onClose }) {
             </div>
           </div>
           
-          <div className="settings-modal__section" style={{ marginTop: 'auto' }}>
+          <div className="settings-modal__section" style={{ marginTop: 'auto', gap: '10px', display: 'flex', flexDirection: 'column' }}>
+            <button className="settings-modal__about-btn" onClick={() => setShowAbout(true)}>
+              <IoInformationCircleOutline size={20} /> About BeatBox
+            </button>
             <button className="settings-modal__logout-btn" onClick={handleLogout}>
               <IoLogOutOutline size={20} /> Log Out
             </button>
           </div>
         </div>
       </div>
+
+      {showAbout && <AboutModal onClose={() => setShowAbout(false)} />}
     </div>
   );
 }

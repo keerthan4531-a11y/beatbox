@@ -120,11 +120,13 @@ export default function MovieDetail() {
             <p>Playing from {activeServer === 'vidlink' ? 'Server 1 (VidLink)' : activeServer === 'vidsrc_icu' ? 'Server 2 (VidSrc)' : activeServer === 'embed_su' ? 'Server 3 (EmbedSU)' : 'Server 4 (MultiEmbed)'}. If Tamil not working, switch server.</p>
           </div>
           <iframe
+            key={`${movie.id}-${activeServer}`}
             src={getMovieEmbedUrl(movie.id, activeServer)}
             title={movie.title}
             allowFullScreen
-            allow="autoplay; encrypted-media"
-            referrerPolicy="origin"
+            allow="autoplay; encrypted-media; picture-in-picture; web-share"
+            referrerPolicy="no-referrer"
+            loading="lazy"
           />
         </div>
       )}

@@ -86,9 +86,15 @@ export default function CategoryView() {
 
   if (loading && songs.length === 0 && albums.length === 0) return <Loader />;
 
-  const bannerImage = viewMode === 'albums'
-    ? (albums[0]?.image?.find(i => i.quality === '500x500')?.url || albums[0]?.image?.[2]?.url)
-    : (songs[0]?.image?.find(i => i.quality === '500x500')?.url || songs[0]?.image?.[2]?.url);
+  const getBannerUrl = (item) => {
+    if (!item?.image) return '';
+    if (Array.isArray(item.image)) {
+      return item.image.find(i => i.quality === '500x500')?.url || item.image[item.image.length - 1]?.url || '';
+    }
+    return item.image; // fallback if it's already a string
+  };
+
+  const bannerImage = viewMode === 'albums' ? getBannerUrl(albums[0]) : getBannerUrl(songs[0]);
 
   return (
     <div className="category-view animate-fade-in">
@@ -139,9 +145,9 @@ export default function CategoryView() {
       {/* Albums grid */}
       {viewMode === 'albums' && (
         <div className="category-view__albums-grid">
-          {albums.map((album) => (
+          {albums.map((album, i) => (
             <AlbumCard
-              key={album.id}
+              key={`${album.id}-${i}`}
               album={album}
               onClick={(a) => navigate(`/album/${a.id}`)}
             />

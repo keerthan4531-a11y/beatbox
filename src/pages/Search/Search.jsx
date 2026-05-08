@@ -241,7 +241,7 @@ export default function Search() {
                     <div className="search-page__song-list">
                       {results.songs.slice(0, 4).map((song, i) => (
                         <SongRow
-                          key={song.id}
+                          key={`${song.id}-${i}`}
                           song={song}
                           index={i}
                           queue={results.songs}
@@ -294,7 +294,7 @@ export default function Search() {
                   <div className="search-page__horizontal-scroll">
                     {results.playlists.slice(0, 8).map((pl, i) => (
                       <PlaylistCard
-                        key={pl.id}
+                        key={`${pl.id}-${i}`}
                         playlist={pl}
                         onClick={handlePlaylistClick}
                         style={{ animationDelay: `${i * 50}ms` }}
@@ -311,7 +311,7 @@ export default function Search() {
                   <div className="search-page__song-list">
                     {results.songs.slice(4, 20).map((song, i) => (
                       <SongRow
-                        key={song.id}
+                        key={`${song.id}-${i + 4}`}
                         song={song}
                         index={i + 4}
                         queue={results.songs}
@@ -331,7 +331,7 @@ export default function Search() {
                 <div className="search-page__song-list">
                   {results.songs.map((song, i) => (
                     <SongRow
-                      key={song.id}
+                      key={`${song.id}-${i}`}
                       song={song}
                       index={i}
                       queue={results.songs}
@@ -352,7 +352,7 @@ export default function Search() {
                 <div className="search-page__card-grid search-page__card-grid--artists">
                   {results.artists.map((artist, i) => (
                     <ArtistCard
-                      key={artist.id}
+                      key={`${artist.id}-${i}`}
                       artist={artist}
                       onClick={handleArtistClick}
                       style={{ animationDelay: `${i * 50}ms` }}
@@ -372,7 +372,7 @@ export default function Search() {
                 <div className="search-page__card-grid">
                   {results.albums.map((album, i) => (
                     <AlbumCard
-                      key={album.id}
+                      key={`${album.id}-${i}`}
                       album={album}
                       onClick={handleAlbumClick}
                       style={{ animationDelay: `${i * 50}ms` }}
@@ -392,7 +392,7 @@ export default function Search() {
                 <div className="search-page__card-grid">
                   {results.playlists.map((pl, i) => (
                     <PlaylistCard
-                      key={pl.id}
+                      key={`${pl.id}-${i}`}
                       playlist={pl}
                       onClick={handlePlaylistClick}
                       style={{ animationDelay: `${i * 50}ms` }}

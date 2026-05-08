@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useReducer, useCallback, useRef, useEffect } from 'react';
 import { getBestDownloadUrl, getHighQualityImage, decodeHTML, getArtistNames } from '../utils/helpers';
 import { updateNativeNotification } from '../utils/nativeMediaBridge';
+import { getAllStreamVariants } from '../api/saavn';
 
 const PlayerContext = createContext(null);
 
@@ -192,6 +193,7 @@ export function PlayerProvider({ children }) {
   // Refs to track latest state values without re-registering event listeners
   const isPlayingRef = useRef(state.isPlaying);
   const repeatModeRef = useRef(state.repeatMode);
+  const isSwitchingRef = useRef(false);
 
   // Keep refs in sync with state
   useEffect(() => { isPlayingRef.current = state.isPlaying; }, [state.isPlaying]);
@@ -250,10 +252,82 @@ export function PlayerProvider({ children }) {
     tryPlay(attempts);
   }, []);
 
+  /**
+   * Tries each stream URL variant (direct + proxies, all qualities)
+   * until audio actually loads. Stops at first success.
+   */
+  const tryPlayWithFallbacks = useCallback(async (song, audioRef) => {
+    const audio = audioRef.current;
+    if (!audio || !song?.downloadUrl) {
+      dispatch({ type: 'SET_LOADING', payload: false });
+      return false;
+    }
+
+    isSwitchingRef.current = true;
+    const variants = getAllStreamVariants(song.downloadUrl);
+    console.log(`[BeatBox] Trying ${variants.length} stream variants for: ${song.name}`);
+
+    for (let i = 0; i < variants.length; i++) {
+      const { url, quality, proxy } = variants[i];
+      console.log(`[BeatBox] Variant ${i + 1}/${variants.length} [${quality}] [${proxy}]`);
+
+      try {
+        // Set source and attempt playback
+        audio.pause();
+        audio.src = url;
+        audio.load();
+
+        await new Promise((resolve, reject) => {
+          const onCanPlay = () => {
+            cleanup();
+            resolve();
+          };
+          const onError = (e) => {
+            cleanup();
+            reject(new Error(`Audio error: ${audio.error?.message || 'unknown'}`));
+          };
+          // Timeout if it stalls for too long
+          const timeout = setTimeout(() => {
+            cleanup();
+            reject(new Error('Timed out waiting for canplay'));
+          }, 6000);
+
+          function cleanup() {
+            audio.removeEventListener('canplay', onCanPlay);
+            audio.removeEventListener('error', onError);
+            clearTimeout(timeout);
+          }
+
+          audio.addEventListener('canplay', onCanPlay, { once: true });
+          audio.addEventListener('error', onError, { once: true });
+        });
+
+        // If we get here, audio loaded successfully
+        if (isPlayingRef.current) {
+          await audio.play();
+        }
+        console.log(`[BeatBox] ✅ Playing with variant ${i + 1} [${quality}] [${proxy}]`);
+        isSwitchingRef.current = false;
+        return true;
+
+      } catch (err) {
+        console.warn(`[BeatBox] Variant ${i + 1} failed: ${err.message}`);
+        // Continue to next variant
+      }
+    }
+
+    // All variants exhausted
+    console.error('[BeatBox] ❌ All stream variants failed for:', song.name);
+    isSwitchingRef.current = false;
+    dispatch({ type: 'SET_LOADING', payload: false });
+    return false;
+  }, []);
+
   // Audio element event handlers — registered ONCE, use refs for latest state
   useEffect(() => {
     const audio = audioRef.current;
     audio.preload = 'auto';
+    audio.crossOrigin = 'anonymous'; // Important for proxied streams
 
     const onLoadedMetadata = () => {
       dispatch({ type: 'SET_DURATION', payload: audio.duration });
@@ -302,10 +376,11 @@ export function PlayerProvider({ children }) {
 
     // 🔧 FIX: Handle audio stall (network buffer underrun)
     const onStalled = () => {
+      if (isSwitchingRef.current) return; // Don't interfere with fallback logic
       console.warn('[BeatBox] Audio stalled, attempting recovery...');
       if (isPlayingRef.current && audio.src) {
         setTimeout(() => {
-          if (audio.paused && isPlayingRef.current) {
+          if (audio.paused && isPlayingRef.current && !isSwitchingRef.current) {
             playWithRetry(audio, 2);
           }
         }, 1000);
@@ -336,6 +411,8 @@ export function PlayerProvider({ children }) {
   // Play/pause effect
   useEffect(() => {
     const audio = audioRef.current;
+    if (isSwitchingRef.current) return; // Don't interfere with fallback logic
+
     if (state.isPlaying && audio.src) {
       playWithRetry(audio);
       
@@ -363,28 +440,15 @@ export function PlayerProvider({ children }) {
     const song = state.currentSong;
     const audio = audioRef.current;
     
-    // Use pre-computed streamUrl first, then fall back to quality picker
-    const useHighQuality = state.audioQuality === '320kbps' && !state.dataSaver;
-    let url = song.streamUrl || getBestDownloadUrl(song.downloadUrl, !useHighQuality);
-    
-    // 🔧 Strip preview marker from URL to ensure full song plays
-    if (url && typeof url === 'string') {
-      url = url.replace(/_p\.mp4/g, '.mp4').replace(/_p\.m4a/g, '.m4a').replace(/_p\.aac/g, '.aac');
-    }
-    
-    if (!url) return;
-
-    const doLoad = () => {
-      // Pause old source cleanly before switching
-      audio.pause();
-      audio.src = url;
-      audio.load();
-      
-      // Request play immediately instead of waiting for canplay.
-      // This creates a Promise that the browser honors natively,
-      // avoiding JS event loop throttling in the background.
-      if (isPlayingRef.current) {
-        playWithRetry(audio);
+    // No need to compute URL here anymore as tryPlayWithFallbacks handles all variants
+    const doLoad = async () => {
+      dispatch({ type: 'SET_LOADING', payload: true });
+      const success = await tryPlayWithFallbacks(song, audioRef);
+      if (!success) {
+        // If all fallbacks failed, skip to next song
+        setTimeout(() => {
+          dispatch({ type: 'NEXT_SONG' });
+        }, 2000);
       }
     };
     

@@ -29,9 +29,9 @@ export default function MoviesHome() {
       try {
         // Core Tamil Sections
         const [trending, latest, tv] = await Promise.all([
-          getTamilMovies(),
-          getLatestTamilMovies(),
-          getTamilTVShows()
+          getTamilMovies().catch(e => { console.error(e); return { results: [] }; }),
+          getLatestTamilMovies().catch(e => { console.error(e); return { results: [] }; }),
+          getTamilTVShows().catch(e => { console.error(e); return { results: [] }; })
         ]);
 
         // Bundle Sections (Marvel, Romance, Adventure, Horror, Anime)

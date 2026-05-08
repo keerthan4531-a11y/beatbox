@@ -6,9 +6,11 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Build;
 import android.os.Bundle;
+import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
+import android.os.Message;
 import com.getcapacitor.BridgeActivity;
 
 /**
@@ -52,10 +54,21 @@ public class MainActivity extends BridgeActivity {
         // Custom WebView Interceptor to block Ads (like Brave)
         WebView webView = this.bridge.getWebView();
         
-        // Disable popups
+        // Disable popups and enable standard web features
         webView.getSettings().setSupportMultipleWindows(false);
         webView.getSettings().setJavaScriptCanOpenWindowsAutomatically(false);
         webView.getSettings().setMediaPlaybackRequiresUserGesture(false);
+        webView.getSettings().setDomStorageEnabled(true);
+        webView.getSettings().setDatabaseEnabled(true);
+        webView.getSettings().setJavaScriptEnabled(true);
+        
+        // 🔧 FIX: Set a clean User-Agent to avoid detection by movie embed servers
+        // Many servers block the default WebView/Capacitor UA.
+        String standardUA = webView.getSettings().getUserAgentString()
+                .replace("Version/4.0 ", "")
+                .replace("Capacitor/", "")
+                .replace("com.uxbeat.app", "Chrome/124.0.0.0");
+        webView.getSettings().setUserAgentString(standardUA);
 
         // Register the JavaScript → Native bridge for media notifications
         webView.addJavascriptInterface(new WebAppBridge(this), "BeatBoxBridge");
@@ -115,19 +128,17 @@ public class MainActivity extends BridgeActivity {
             @Override
             public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
                 String url = request.getUrl().toString().toLowerCase();
-                // Block known ad networks and betting sites
+                // Block known ad networks, trackers and betting sites
                 if (url.contains("doubleclick.net") || 
                     url.contains("googleadservices.com") || 
                     url.contains("popads") || 
-                    url.contains("bet365") || 
                     url.contains("adsystem") ||
-                    url.contains("1xbet") ||
                     url.contains("adnetwork") ||
+                    url.contains("adsco.re") ||
                     url.contains("onclick") ||
                     url.contains("yandex.ru") ||
                     url.contains("clarity.ms") ||
-                    url.contains("cloudflareinsights") ||
-                    url.contains("vidsrc") && url.contains("ads")) {
+                    url.contains("cloudflareinsights")) {
                     return new WebResourceResponse("text/plain", "UTF-8", null);
                 }
                 return super.shouldInterceptRequest(view, request);
@@ -136,14 +147,26 @@ public class MainActivity extends BridgeActivity {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 String url = request.getUrl().toString().toLowerCase();
-                // Block any external navigation that looks like an ad
-                if (!url.startsWith("http://localhost") && (
-                    url.contains("bet") || url.contains("casino") || url.contains("game") || 
-                    url.contains("ads") || url.contains("click") || url.contains("track")
-                )) {
-                    return true; // Handle (block) the navigation
+                
+                // 🛡️ STRICT ANDROID LOGIC: Block ALL top-level navigation to external sites.
+                // Our app should only navigate within 'localhost'.
+                // This prevents ads in iframes from hijacking the main app screen.
+                if (!url.contains("localhost")) {
+                    android.util.Log.d("BeatBox", "Blocked external navigation: " + url);
+                    return true; // Return true means we handled (blocked) it.
                 }
+                
                 return super.shouldOverrideUrlLoading(view, request);
+            }
+        });
+
+        // 🛡️ STRICT WINDOW LOGIC: Prevent 'window.open' or 'target="_blank"' from working.
+        webView.setWebChromeClient(new WebChromeClient() {
+            @Override
+            public boolean onCreateWindow(WebView view, boolean isDialog, boolean isUserGesture, Message resultMsg) {
+                // Return false means we don't allow creating new windows/tabs.
+                android.util.Log.d("BeatBox", "Blocked popup window request.");
+                return false; 
             }
         });
     }

@@ -198,6 +198,28 @@ input:checked + .settings-modal__slider:before {
   color: #10001a;
 }
 
+.settings-modal__about-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px;
+  border-radius: var(--radius-full);
+  background: linear-gradient(to right, #4361ee, #7209b7);
+  border: none;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  transition: all 0.2s;
+  box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3);
+}
+
+.settings-modal__about-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(67, 97, 238, 0.4);
+}
+
 .settings-modal__logout-btn {
   width: 100%;
   display: flex;
@@ -207,16 +229,11 @@ input:checked + .settings-modal__slider:before {
   padding: 14px;
   border-radius: var(--radius-full);
   background: transparent;
-  border: 1px solid var(--text-subdued);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   color: var(--text-primary);
   font-size: 15px;
   font-weight: 600;
   transition: all 0.2s;
-}
-
-.settings-modal__logout-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: var(--text-primary);
 }
 
 @keyframes slideUp {
