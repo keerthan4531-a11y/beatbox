@@ -12,7 +12,7 @@ import {
   IoAlbumsOutline,
 } from 'react-icons/io5';
 import { usePlayer } from '../../context/PlayerContext';
-import { shareSong } from '../../utils/shareSong';
+import ShareModal from '../ShareModal/ShareModal';
 import { decodeHTML, getHighQualityImage, getArtistNames } from '../../utils/helpers';
 import { useNavigate } from 'react-router-dom';
 import './SongContextMenu.css';
@@ -21,6 +21,7 @@ export default function SongContextMenu({ song, onClose, onShowDetails }) {
   const navigate = useNavigate();
   const { addToQueue, toggleLike, isLiked, playSong } = usePlayer();
   const [toast, setToast] = useState('');
+  const [showShareModal, setShowShareModal] = useState(false);
 
   if (!song) return null;
 
@@ -78,10 +79,8 @@ export default function SongContextMenu({ song, onClose, onShowDetails }) {
     {
       icon: <IoShareSocialOutline />,
       label: 'Share',
-      onClick: async () => {
-        const result = await shareSong(song);
-        if (result === 'copied') showToast('Link copied to clipboard!');
-        else if (result) showToast('Shared!');
+      onClick: () => {
+        setShowShareModal(true);
       },
     },
     {
@@ -95,39 +94,51 @@ export default function SongContextMenu({ song, onClose, onShowDetails }) {
   ];
 
   return (
-    <div className="song-context-overlay" onClick={onClose}>
-      <div className="song-context" onClick={(e) => e.stopPropagation()}>
-        {/* Song Preview */}
-        <div className="song-context__preview">
-          <img className="song-context__image" src={image} alt={title} />
-          <div className="song-context__meta">
-            <p className="song-context__title">{title}</p>
-            <p className="song-context__artist">{artist}</p>
-          </div>
-          <button className="song-context__close" onClick={onClose} aria-label="Close">
-            <IoClose />
-          </button>
-        </div>
-
-        {/* Actions */}
-        <div className="song-context__actions">
-          {actions.map((action, i) => (
-            <button
-              key={i}
-              className={`song-context__action ${action.className || ''}`}
-              onClick={action.onClick}
-            >
-              <span className="song-context__action-icon">{action.icon}</span>
-              <span className="song-context__action-label">{action.label}</span>
+    <>
+      <div className="song-context-overlay" onClick={onClose}>
+        <div className="song-context" onClick={(e) => e.stopPropagation()}>
+          {/* Song Preview */}
+          <div className="song-context__preview">
+            <img className="song-context__image" src={image} alt={title} />
+            <div className="song-context__meta">
+              <p className="song-context__title">{title}</p>
+              <p className="song-context__artist">{artist}</p>
+            </div>
+            <button className="song-context__close" onClick={onClose} aria-label="Close">
+              <IoClose />
             </button>
-          ))}
-        </div>
+          </div>
 
-        {/* Toast */}
-        {toast && (
-          <div className="song-context__toast">{toast}</div>
-        )}
+          {/* Actions */}
+          <div className="song-context__actions">
+            {actions.map((action, i) => (
+              <button
+                key={i}
+                className={`song-context__action ${action.className || ''}`}
+                onClick={action.onClick}
+              >
+                <span className="song-context__action-icon">{action.icon}</span>
+                <span className="song-context__action-label">{action.label}</span>
+              </button>
+            ))}
+          </div>
+
+          {/* Toast */}
+          {toast && (
+            <div className="song-context__toast">{toast}</div>
+          )}
+        </div>
       </div>
-    </div>
+
+      {showShareModal && (
+        <ShareModal 
+          song={song} 
+          onClose={() => {
+            setShowShareModal(false);
+            onClose();
+          }} 
+        />
+      )}
+    </>
   );
 }

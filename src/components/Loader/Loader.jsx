@@ -3,14 +3,10 @@ import './Loader.css';
 
 export default function Loader() {
   return (
-    <div className="loader-overlay" id="loader">
-      <div className="loader-spinner">
-        <div className="loader-bar"></div>
-        <div className="loader-bar"></div>
-        <div className="loader-bar"></div>
-        <div className="loader-bar"></div>
-        <div className="loader-bar"></div>
-      </div>
+    <div className="skeleton-grid" id="loader">
+      {Array.from({ length: 8 }).map((_, i) => (
+        <SkeletonCard key={i} />
+      ))}
     </div>
   );
 }

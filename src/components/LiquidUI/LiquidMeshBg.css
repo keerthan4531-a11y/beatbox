@@ -1,0 +1,87 @@
+.liquid-mesh-container {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  z-index: 0;
+  pointer-events: none;
+  background: #030f0a;
+}
+
+.liquid-mesh-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(100px);
+  opacity: 0.45;
+  mix-blend-mode: screen;
+  will-change: transform;
+}
+
+.blob-1 {
+  width: 50vw;
+  height: 50vw;
+  background: radial-gradient(circle, rgba(27, 170, 120, 0.45) 0%, transparent 80%);
+  top: -10%;
+  left: -10%;
+  animation: floatBlob1 28s ease-in-out infinite alternate;
+}
+
+.blob-2 {
+  width: 60vw;
+  height: 60vw;
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.4) 0%, transparent 80%);
+  bottom: -15%;
+  right: -5%;
+  animation: floatBlob2 35s ease-in-out infinite alternate;
+}
+
+.blob-3 {
+  width: 45vw;
+  height: 45vw;
+  background: radial-gradient(circle, rgba(52, 209, 153, 0.35) 0%, transparent 80%);
+  top: 40%;
+  left: 35%;
+  animation: floatBlob3 32s ease-in-out infinite alternate;
+}
+
+.blob-4 {
+  width: 55vw;
+  height: 55vw;
+  background: radial-gradient(circle, rgba(5, 150, 105, 0.3) 0%, transparent 80%);
+  bottom: 30%;
+  left: -5%;
+  animation: floatBlob4 25s ease-in-out infinite alternate;
+}
+
+.liquid-mesh-overlay {
+  position: absolute;
+  inset: 0;
+  /* Subtly textured noise overlay for premium cinematic feeling */
+  background-image: radial-gradient(rgba(255,255,255,0.02) 1px, transparent 1px);
+  background-size: 24px 24px;
+  opacity: 0.3;
+  z-index: 1;
+}
+
+@keyframes floatBlob1 {
+  0% { transform: translate(0, 0) scale(1) rotate(0deg); }
+  50% { transform: translate(15%, 10%) scale(1.1) rotate(120deg); }
+  100% { transform: translate(-5%, 25%) scale(0.9) rotate(360deg); }
+}
+
+@keyframes floatBlob2 {
+  0% { transform: translate(0, 0) scale(1) rotate(0deg); }
+  50% { transform: translate(-20%, -15%) scale(0.85) rotate(-180deg); }
+  100% { transform: translate(10%, -5%) scale(1.05) rotate(-360deg); }
+}
+
+@keyframes floatBlob3 {
+  0% { transform: translate(0, 0) scale(0.9) rotate(0deg); }
+  50% { transform: translate(-10%, 25%) scale(1.15) rotate(90deg); }
+  100% { transform: translate(15%, -10%) scale(1.0) rotate(180deg); }
+}
+
+@keyframes floatBlob4 {
+  0% { transform: translate(0, 0) scale(1) rotate(0deg); }
+  50% { transform: translate(25%, -20%) scale(0.9) rotate(180deg); }
+  100% { transform: translate(-10%, 10%) scale(1.1) rotate(360deg); }
+}

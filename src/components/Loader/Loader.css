@@ -1,53 +1,63 @@
-.loader-overlay {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: var(--space-3xl);
+/* ══════════════════════════════════════════════════════
+   Loader — Glassmorphic Skeleton Loading Grid
+   ══════════════════════════════════════════════════════ */
+
+.skeleton-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: var(--space-lg);
   width: 100%;
+  padding: var(--space-md) 0;
+  animation: fadeIn 0.4s ease forwards;
 }
 
-.loader-spinner {
+.skeleton-wrapper {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-lg);
+  padding: 12px;
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  box-shadow: 
+    0 4px 20px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
   display: flex;
-  align-items: flex-end;
-  gap: 4px;
-  height: 32px;
+  flex-direction: column;
+  gap: var(--space-sm);
 }
 
-.loader-bar {
-  width: 4px;
-  background: var(--brand-primary);
-  border-radius: var(--radius-full);
-  animation: barBounce 0.8s ease-in-out infinite;
-}
-
-.loader-bar:nth-child(1) { animation-delay: 0s; height: 8px; }
-.loader-bar:nth-child(2) { animation-delay: 0.1s; height: 16px; }
-.loader-bar:nth-child(3) { animation-delay: 0.2s; height: 12px; }
-.loader-bar:nth-child(4) { animation-delay: 0.3s; height: 20px; }
-.loader-bar:nth-child(5) { animation-delay: 0.4s; height: 8px; }
-
-/* Skeleton loader */
+/* Skeleton shimmer base */
 .skeleton {
-  background: linear-gradient(90deg, var(--bg-surface) 25%, var(--bg-surface-hover) 50%, var(--bg-surface) 75%);
+  background: linear-gradient(90deg,
+    rgba(255, 255, 255, 0.03) 25%,
+    rgba(255, 255, 255, 0.08) 50%,
+    rgba(255, 255, 255, 0.03) 75%
+  );
   background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
+  animation: shimmer 1.6s infinite linear;
   border-radius: var(--radius-md);
 }
 
 .skeleton-card {
   width: 100%;
   aspect-ratio: 1;
-  border-radius: var(--radius-md);
 }
 
 .skeleton-text {
   height: 14px;
   width: 80%;
-  margin-top: var(--space-sm);
 }
 
 .skeleton-text-sm {
   height: 10px;
-  width: 60%;
-  margin-top: var(--space-xs);
+  width: 55%;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
 }

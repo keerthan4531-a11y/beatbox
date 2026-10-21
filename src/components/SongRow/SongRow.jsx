@@ -1,16 +1,43 @@
 import React, { useState, useRef } from 'react';
-import { IoPlay, IoHeart, IoHeartOutline, IoEllipsisHorizontal, IoAdd } from 'react-icons/io5';
+import { IoPlay, IoHeart, IoHeartOutline, IoEllipsisHorizontal, IoAdd, IoArrowDownCircleOutline, IoCheckmarkCircle, IoSync } from 'react-icons/io5';
 import { useNavigate } from 'react-router-dom';
 import { usePlayer } from '../../context/PlayerContext';
 import { getMediumQualityImage, decodeHTML, getArtistNames, formatDuration } from '../../utils/helpers';
+import { downloadSong, deleteSongDownload, isSongDownloaded } from '../../utils/offline';
 import SongContextMenu from '../SongContextMenu/SongContextMenu';
 import SongDetails from '../SongDetails/SongDetails';
+import HeartExplosion from '../LiquidUI/HeartExplosion';
 import './SongRow.css';
 
 export default function SongRow({ song, index, queue, showAlbum = true, showImage = true }) {
   const { playSong, currentSong, isPlaying, togglePlay, toggleLike, isLiked, addToQueue } = usePlayer();
   const [showContextMenu, setShowContextMenu] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
+
+  const [isDownloaded, setIsDownloaded] = useState(() => isSongDownloaded(song.id));
+  const [isDownloading, setIsDownloading] = useState(false);
+
+  const handleDownload = async (e) => {
+    e.stopPropagation();
+    if (isDownloading) return;
+    
+    if (isDownloaded) {
+      const success = await deleteSongDownload(song.id);
+      if (success) {
+        setIsDownloaded(false);
+      }
+    } else {
+      setIsDownloading(true);
+      try {
+        await downloadSong(song);
+        setIsDownloaded(true);
+      } catch (err) {
+        alert(`Download failed: ${err.message}`);
+      } finally {
+        setIsDownloading(false);
+      }
+    }
+  };
 
   if (!song) return null;
 
@@ -27,12 +54,16 @@ export default function SongRow({ song, index, queue, showAlbum = true, showImag
 
   const [swipeOffset, setSwipeOffset] = useState(0);
   const [showQueueToast, setShowQueueToast] = useState(false);
+  const [explosionActive, setExplosionActive] = useState(false);
   const touchStartX = useRef(0);
   const isSwiping = useRef(false);
 
   const handleLike = (e) => {
-    e.stopPropagation();
+    if (e) e.stopPropagation();
     toggleLike(song);
+    if (!liked) {
+      setExplosionActive(true);
+    }
   };
 
   const onTouchStart = (e) => {
@@ -43,8 +74,9 @@ export default function SongRow({ song, index, queue, showAlbum = true, showImag
   const onTouchMove = (e) => {
     if (!isSwiping.current) return;
     const diff = e.touches[0].clientX - touchStartX.current;
-    // Only allow swipe right
-    if (diff > 0 && diff < 100) {
+    if (diff > 0 && diff < 120) {
+      setSwipeOffset(diff);
+    } else if (diff < 0 && diff > -120) {
       setSwipeOffset(diff);
     }
   };
@@ -53,13 +85,14 @@ export default function SongRow({ song, index, queue, showAlbum = true, showImag
     if (!isSwiping.current) return;
     isSwiping.current = false;
     
-    // If swiped enough to the right (e.g. > 60px)
     if (swipeOffset > 60) {
       addToQueue(song);
       setShowQueueToast(true);
-      setTimeout(() => setShowQueueToast(false), 2000); // hide toast after 2s
+      setTimeout(() => setShowQueueToast(false), 2000);
+    } else if (swipeOffset < -60) {
+      handleLike();
     }
-    setSwipeOffset(0); // bounce back
+    setSwipeOffset(0);
   };
 
   const handleMoreClick = (e) => {
@@ -78,10 +111,19 @@ export default function SongRow({ song, index, queue, showAlbum = true, showImag
   return (
     <>
       <div className="song-row-wrapper" style={{ position: 'relative', overflow: 'hidden' }}>
-        {/* Background icon revealed on swipe */}
-        <div className="song-row__swipe-action" style={{ opacity: swipeOffset > 30 ? 1 : 0 }}>
-          <IoAdd size={24} color="#00d2ff" />
-        </div>
+        {/* Background icon revealed on swipe right */}
+        {swipeOffset > 0 && (
+          <div className="song-row__swipe-action song-row__swipe-action--right" style={{ opacity: swipeOffset > 30 ? 1 : 0 }}>
+            <IoAdd size={24} color="var(--brand-primary)" />
+          </div>
+        )}
+        
+        {/* Background icon revealed on swipe left */}
+        {swipeOffset < 0 && (
+          <div className="song-row__swipe-action song-row__swipe-action--left" style={{ opacity: swipeOffset < -30 ? 1 : 0 }}>
+            {liked ? <IoHeart size={24} color="var(--brand-primary)" /> : <IoHeartOutline size={24} color="var(--brand-primary)" />}
+          </div>
+        )}
 
         <div
           className={`song-row ${isCurrentSong && isPlaying ? 'playing' : ''} ${showQueueToast ? 'queued' : ''}`}
@@ -141,7 +183,22 @@ export default function SongRow({ song, index, queue, showAlbum = true, showImag
             onClick={handleLike}
             aria-label={liked ? 'Unlike' : 'Like'}
           >
+            <HeartExplosion active={explosionActive} onComplete={() => setExplosionActive(false)} />
             {liked ? <IoHeart /> : <IoHeartOutline />}
+          </button>
+          <button
+            className={`song-row__download-btn ${isDownloaded ? 'downloaded' : ''} ${isDownloading ? 'downloading' : ''}`}
+            onClick={handleDownload}
+            aria-label={isDownloaded ? 'Delete Download' : 'Download Song'}
+            title={isDownloaded ? 'Delete Download' : 'Download Song'}
+          >
+            {isDownloading ? (
+              <IoSync />
+            ) : isDownloaded ? (
+              <IoCheckmarkCircle />
+            ) : (
+              <IoArrowDownCircleOutline />
+            )}
           </button>
           <span className="song-row__duration">
             {formatDuration(song.duration)}

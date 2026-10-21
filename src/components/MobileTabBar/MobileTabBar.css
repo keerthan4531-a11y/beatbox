@@ -1,17 +1,49 @@
+/* ══════════════════════════════════════════════════════
+   Mobile Tab Bar — Frosted Glass Dock
+   ══════════════════════════════════════════════════════ */
+
 .mobile-tab-bar {
   display: none;
   position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  bottom: 16px;
+  left: 16px;
+  right: 16px;
   height: var(--tab-bar-height);
-  background: rgba(16, 0, 26, 0.85);
-  backdrop-filter: blur(40px);
-  -webkit-backdrop-filter: blur(40px);
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-  z-index: 40;
-  padding: 0 var(--space-sm);
-  padding-bottom: env(safe-area-inset-bottom);
+  background: rgba(3, 15, 10, 0.6);
+  backdrop-filter: blur(30px) saturate(200%);
+  -webkit-backdrop-filter: blur(30px) saturate(200%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-full);
+  z-index: 10000;
+  padding: 0 var(--space-md);
+  box-shadow: 
+    0 12px 32px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), opacity 0.3s ease;
+  will-change: transform, opacity;
+}
+
+.mobile-tab-bar.hidden {
+  transform: translateY(calc(100% + 30px));
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Specular top edge */
+.mobile-tab-bar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 10%;
+  right: 10%;
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent,
+    rgba(255, 255, 255, 0.12),
+    transparent
+  );
+  pointer-events: none;
+  z-index: 1;
 }
 
 .mobile-tab-bar__inner {
@@ -27,12 +59,13 @@
   align-items: center;
   gap: 3px;
   padding: var(--space-xs) var(--space-md);
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(248, 248, 255, 0.45);
   font-size: 10px;
   font-weight: 500;
   transition: all var(--transition-fast);
   min-width: 48px;
   border-radius: var(--radius-md);
+  letter-spacing: 0.3px;
 }
 
 .mobile-tab-bar__item.active {
@@ -40,12 +73,12 @@
 }
 
 .mobile-tab-bar__item.active .mobile-tab-bar__icon {
-  color: #00d2ff;
-  filter: drop-shadow(0 0 6px rgba(0, 210, 255, 0.7));
+  color: var(--brand-primary);
+  filter: drop-shadow(0 0 8px rgba(0, 212, 255, 0.6));
 }
 
 .mobile-tab-bar__item:hover {
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba(248, 248, 255, 0.75);
 }
 
 .mobile-tab-bar__icon {
@@ -56,7 +89,15 @@
 .mobile-tab-bar__divider {
   width: 1px;
   height: 28px;
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+/* Spotify mode button green accent */
+.mobile-tab-bar__mode-btn.spotify-mode .mobile-tab-bar__icon {
+  color: #1DB954;
+}
+.mobile-tab-bar__mode-btn.spotify-mode {
+  color: rgba(29, 185, 84, 0.8);
 }
 
 @media (max-width: 768px) {

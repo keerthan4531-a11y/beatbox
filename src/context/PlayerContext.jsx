@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useReducer, useCallback, useRef, useEffect } from 'react';
+import React, { createContext, useContext, useReducer, useCallback, useRef, useEffect, useState } from 'react';
 import { getBestDownloadUrl, getHighQualityImage, decodeHTML, getArtistNames } from '../utils/helpers';
 import { updateNativeNotification } from '../utils/nativeMediaBridge';
 import { getAllStreamVariants } from '../api/saavn';
@@ -195,6 +195,37 @@ export function PlayerProvider({ children }) {
   const repeatModeRef = useRef(state.repeatMode);
   const isSwitchingRef = useRef(false);
 
+  const [analyser, setAnalyser] = useState(null);
+  const audioContextRef = useRef(null);
+  const sourceRef = useRef(null);
+  const activeBlobUrlRef = useRef(null);
+
+  const initAudioAnalyzer = useCallback(() => {
+    if (analyser) return analyser;
+    try {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      const ctx = new AudioCtx();
+      const analyserNode = ctx.createAnalyser();
+      analyserNode.fftSize = 256;
+      
+      const audio = audioRef.current;
+      audio.crossOrigin = 'anonymous';
+      
+      const source = ctx.createMediaElementSource(audio);
+      source.connect(analyserNode);
+      analyserNode.connect(ctx.destination);
+      
+      audioContextRef.current = ctx;
+      sourceRef.current = source;
+      setAnalyser(analyserNode);
+      console.log('[PlayerContext] Web Audio Analyser initialized successfully');
+      return analyserNode;
+    } catch (e) {
+      console.warn('[PlayerContext] Web Audio Analyser init failed:', e);
+      return null;
+    }
+  }, [analyser]);
+
   // Keep refs in sync with state
   useEffect(() => { isPlayingRef.current = state.isPlaying; }, [state.isPlaying]);
   useEffect(() => { repeatModeRef.current = state.repeatMode; }, [state.repeatMode]);
@@ -258,13 +289,59 @@ export function PlayerProvider({ children }) {
    */
   const tryPlayWithFallbacks = useCallback(async (song, audioRef) => {
     const audio = audioRef.current;
-    if (!audio || !song?.downloadUrl) {
+    if (!audio || !song) {
       dispatch({ type: 'SET_LOADING', payload: false });
       return false;
     }
 
+    // Revoke previous Blob URL if any to prevent memory leaks
+    if (activeBlobUrlRef.current) {
+      try {
+        URL.revokeObjectURL(activeBlobUrlRef.current);
+      } catch (e) {}
+      activeBlobUrlRef.current = null;
+    }
+
     isSwitchingRef.current = true;
-    const variants = getAllStreamVariants(song.downloadUrl);
+
+    // Check if the song is downloaded and cached offline
+    try {
+      const cache = await caches.open('beatbox_offline_cache');
+      const cachedResponse = await cache.match(`/offline-audio/${song.id}`);
+      if (cachedResponse) {
+        console.log(`[BeatBox] 📂 Found offline download for "${song.name}", playing locally...`);
+        const blob = await cachedResponse.blob();
+        const localUrl = URL.createObjectURL(blob);
+        activeBlobUrlRef.current = localUrl;
+        
+        audio.pause();
+        audio.src = localUrl;
+        audio.load();
+        
+        if (isPlayingRef.current) {
+          try {
+            await audio.play();
+          } catch (pErr) {
+            console.warn('[BeatBox] Play failed on offline start:', pErr);
+          }
+        }
+        isSwitchingRef.current = false;
+        dispatch({ type: 'SET_LOADING', payload: false });
+        return true;
+      }
+    } catch (cacheErr) {
+      console.warn('[BeatBox] Cache offline fetch failed:', cacheErr);
+    }
+
+    const variants = [];
+
+
+    
+    // Try Saavn URLs
+    if (song.downloadUrl) {
+      variants.push(...getAllStreamVariants(song.downloadUrl));
+    }
+
     console.log(`[BeatBox] Trying ${variants.length} stream variants for: ${song.name}`);
 
     for (let i = 0; i < variants.length; i++) {
@@ -316,8 +393,45 @@ export function PlayerProvider({ children }) {
       }
     }
 
-    // All variants exhausted
-    console.error('[BeatBox] ❌ All stream variants failed for:', song.name);
+    // All Saavn variants exhausted — try YouTube audio as last resort
+    console.warn('[BeatBox] ⚡ All Saavn streams failed, trying YouTube audio fallback...');
+    try {
+      const { getYouTubeAudioStream } = await import('../api/saavn');
+      const artistName = song.primaryArtists || song.artists?.primary?.map(a => a.name).join(', ') || '';
+      const ytUrl = await getYouTubeAudioStream(song.name || song.title, artistName);
+      
+      if (ytUrl) {
+        console.log('[BeatBox] 🎵 Got YouTube audio URL, attempting playback...');
+        audio.pause();
+        audio.src = ytUrl;
+        audio.load();
+
+        await new Promise((resolve, reject) => {
+          const onCanPlay = () => { cleanup(); resolve(); };
+          const onError = () => { cleanup(); reject(new Error('YouTube audio load error')); };
+          const timeout = setTimeout(() => { cleanup(); reject(new Error('YouTube audio timed out')); }, 10000);
+          function cleanup() {
+            audio.removeEventListener('canplay', onCanPlay);
+            audio.removeEventListener('error', onError);
+            clearTimeout(timeout);
+          }
+          audio.addEventListener('canplay', onCanPlay, { once: true });
+          audio.addEventListener('error', onError, { once: true });
+        });
+
+        if (isPlayingRef.current) {
+          await audio.play();
+        }
+        console.log('[BeatBox] ✅ Playing via YouTube audio fallback');
+        isSwitchingRef.current = false;
+        return true;
+      }
+    } catch (ytErr) {
+      console.warn('[BeatBox] YouTube fallback also failed:', ytErr.message);
+    }
+
+    // Everything exhausted
+    console.error('[BeatBox] ❌ All stream sources failed for:', song.name);
     isSwitchingRef.current = false;
     dispatch({ type: 'SET_LOADING', payload: false });
     return false;
@@ -327,7 +441,7 @@ export function PlayerProvider({ children }) {
   useEffect(() => {
     const audio = audioRef.current;
     audio.preload = 'auto';
-    audio.crossOrigin = 'anonymous'; // Important for proxied streams
+    audio.crossOrigin = 'anonymous'; // Set crossOrigin to anonymous for visualizer Web Audio analysis
 
     const onLoadedMetadata = () => {
       dispatch({ type: 'SET_DURATION', payload: audio.duration });
@@ -343,8 +457,17 @@ export function PlayerProvider({ children }) {
         audio.currentTime = 0;
         playWithRetry(audio);
       } else {
-        // Dispatch directly without setTimeout to avoid Doze mode throttling
+        // Dispatch NEXT_SONG immediately
         dispatch({ type: 'NEXT_SONG' });
+        
+        // Smart Autoplay retry: If queue was exhausted and playback stopped,
+        // wait for suggestions to load then try again
+        setTimeout(() => {
+          if (!isPlayingRef.current) {
+            console.log('[BeatBox] 🔄 Retrying NEXT_SONG (waiting for autoplay suggestions)...');
+            dispatch({ type: 'NEXT_SONG' });
+          }
+        }, 2500);
       }
     };
 
@@ -556,48 +679,76 @@ export function PlayerProvider({ children }) {
     return () => window.removeEventListener('beatbox-media-action', handleNativeAction);
   }, []);
 
-  // Smart Suggestions (Spotify-like Autoplay)
+  // ── Smart Autoplay (Spotify-like Infinite Radio) ──
+  // When a song ends and there's nothing next in queue, 
+  // fetch similar songs immediately and keep playing
   const isFetchingRef = useRef(false);
+  const autoPlayRef = useRef(true); // Always autoplay by default
 
+  // Pre-fetch suggestions before queue runs out
   useEffect(() => {
     let mounted = true;
     
-    // Pre-fetch suggestions when we are 3 songs away from the end of the queue
-    if (state.queue.length > 0 && state.queueIndex >= state.queue.length - 3 && !isFetchingRef.current) {
-      const currentId = state.currentSong?.id;
-      if (currentId) {
-        isFetchingRef.current = true;
-        import('../api/saavn').then(({ getSongSuggestions }) => {
-          getSongSuggestions(currentId, 50).then(suggestions => {
-            if (!mounted) return;
-            if (suggestions && suggestions.length > 0) {
-              // Filter out songs that are already in the queue to avoid duplicates
-              const newSongs = suggestions.filter(s => !state.queue.some(q => q.id === s.id));
-              if (newSongs.length > 0) {
-                dispatch({ type: 'APPEND_TO_QUEUE', payload: newSongs });
+    const currentId = state.currentSong?.id;
+    if (!currentId || isFetchingRef.current) return;
+
+    // Trigger when: queue is small OR we're near the end
+    const nearEnd = state.queueIndex >= state.queue.length - 3;
+    const singleSong = state.queue.length <= 1;
+
+    if (nearEnd || singleSong) {
+      isFetchingRef.current = true;
+      console.log('[BeatBox] 🎵 Smart Autoplay: Fetching similar songs...');
+      
+      import('../api/saavn').then(({ getSongSuggestions }) => {
+        getSongSuggestions(currentId, 50).then(suggestions => {
+          if (!mounted) return;
+          if (suggestions && suggestions.length > 0) {
+            // Filter out songs already in queue
+            const existingIds = new Set(
+              state.queue.map(q => q.id)
+            );
+            let newSongs = suggestions.filter(s => !existingIds.has(s.id));
+            
+            // If all filtered out, allow repeats but skip the current song
+            if (newSongs.length === 0) {
+              newSongs = suggestions.filter(s => s.id !== currentId);
+            }
+
+            // Shuffle for variety
+            if (state.isShuffled && newSongs.length > 1) {
+              for (let i = newSongs.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newSongs[i], newSongs[j]] = [newSongs[j], newSongs[i]];
               }
             }
-            // Add a small delay before allowing another fetch
-            setTimeout(() => {
-              if (mounted) isFetchingRef.current = false;
-            }, 5000);
-          }).catch(err => {
-            console.error("Auto-play suggestion error:", err);
+
+            if (newSongs.length > 0) {
+              console.log(`[BeatBox] ✅ Added ${newSongs.length} songs to autoplay queue`);
+              dispatch({ type: 'APPEND_TO_QUEUE', payload: newSongs });
+            }
+          }
+          setTimeout(() => {
             if (mounted) isFetchingRef.current = false;
-          });
+          }, 8000);
+        }).catch(err => {
+          console.error("[BeatBox] Autoplay suggestion error:", err);
+          if (mounted) isFetchingRef.current = false;
         });
-      }
+      });
     }
     return () => { mounted = false; };
   }, [state.queueIndex, state.queue.length, state.currentSong?.id]);
 
   const playSong = useCallback((song, queue = [], index = 0) => {
+    initAudioAnalyzer();
     dispatch({ type: 'SET_SONG', payload: { song, queue: queue.length > 0 ? queue : [song], index } });
-  }, []);
+  }, [initAudioAnalyzer]);
 
   const togglePlay = useCallback(() => {
+    initAudioAnalyzer();
     dispatch({ type: 'SET_PLAYING', payload: !state.isPlaying });
-  }, [state.isPlaying]);
+  }, [state.isPlaying, initAudioAnalyzer]);
 
   const nextSong = useCallback(() => {
     dispatch({ type: 'NEXT_SONG' });
@@ -790,6 +941,8 @@ export function PlayerProvider({ children }) {
     logout,
     audioRef,
     dispatch,
+    analyser,
+    initAudioAnalyzer,
   };
 
   return (

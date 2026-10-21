@@ -1,6 +1,6 @@
-/* =====================================================
-   Search Page — Spotify Premium Style
-   ===================================================== */
+/* ══════════════════════════════════════════════════════
+   Search Page — Liquid Glass Discovery
+   ══════════════════════════════════════════════════════ */
 
 .search-page {
   padding: 0 var(--space-xl) calc(var(--tab-bar-height) + 120px);
@@ -22,9 +22,10 @@
   font-weight: 700;
   margin-bottom: var(--space-lg);
   color: var(--text-primary);
+  letter-spacing: -0.5px;
 }
 
-/* ── Genre Grid ── */
+/* ── Genre Grid — Liquid Glass Tiles ── */
 .search-page__genres {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
@@ -43,11 +44,24 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* Glass overlay on genre cards */
+.search-page__genre-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--glass-specular-subtle);
+  pointer-events: none;
+  border-radius: inherit;
 }
 
 .search-page__genre-card:hover {
-  transform: scale(1.03);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+  transform: scale(1.04) translateY(-2px);
+  box-shadow:
+    0 12px 36px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 .search-page__genre-card:active {
@@ -66,7 +80,7 @@
   position: relative;
   z-index: 1;
   color: #fff;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
 }
 
 /* ── Results Container ── */
@@ -74,42 +88,49 @@
   margin-top: var(--space-xs);
 }
 
-/* ── Top Section (Top Result + Songs side by side) ── */
-.search-page__top-section {
+/* ── Grid Layout ── */
+.search-page__grid-layout {
   display: grid;
-  grid-template-columns: 380px 1fr;
+  grid-template-columns: repeat(4, 1fr);
   gap: var(--space-xl);
-  margin-bottom: var(--space-2xl);
+  margin-bottom: var(--space-3xl);
   animation: fadeIn 0.4s ease;
 }
 
-.search-page__top-result-col {
+.search-page__column {
   display: flex;
   flex-direction: column;
-  gap: var(--space-sm);
-}
-
-.search-page__songs-col {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-sm);
+  gap: var(--space-md);
   min-width: 0;
 }
 
-/* ── Song List (vertical) ── */
+.search-page__column-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.search-page__empty-col {
+  padding: var(--space-md);
+  font-size: 13px;
+  color: var(--text-subdued);
+  font-style: italic;
+}
+
+/* ── Song List ── */
 .search-page__song-list {
   display: flex;
   flex-direction: column;
   gap: 2px;
 }
 
-/* ── Section Wrapper ── */
+/* ── Section ── */
 .search-page__section {
   margin-bottom: var(--space-xl);
   animation: fadeIn 0.3s ease;
 }
 
-/* ── Horizontal Scroll Row (for Artists, Albums, Playlists in All tab) ── */
+/* ── Horizontal Scroll Row ── */
 .search-page__horizontal-scroll {
   display: flex;
   overflow-x: auto;
@@ -132,7 +153,7 @@
   width: 160px;
 }
 
-/* ── Card Grid (for individual tabs: Artists, Albums, Playlists) ── */
+/* ── Card Grid ── */
 .search-page__card-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
@@ -154,7 +175,7 @@
 .search-page__no-results-icon {
   font-size: 56px;
   margin-bottom: var(--space-lg);
-  opacity: 0.4;
+  opacity: 0.35;
   color: var(--brand-primary);
 }
 
@@ -171,12 +192,10 @@
   color: var(--text-subdued);
 }
 
-/* ══════════════════════════════════════════
-   Mobile Responsive
-   ══════════════════════════════════════════ */
+/* ── Mobile Responsive ── */
 @media (max-width: 900px) {
-  .search-page__top-section {
-    grid-template-columns: 1fr;
+  .search-page__grid-layout {
+    grid-template-columns: repeat(2, 1fr);
     gap: var(--space-lg);
   }
 }
@@ -184,6 +203,11 @@
 @media (max-width: 768px) {
   .search-page {
     padding: 0 var(--space-md) 200px;
+  }
+
+  .search-page__grid-layout {
+    grid-template-columns: 1fr;
+    gap: var(--space-md);
   }
 
   .search-page__browse-title {

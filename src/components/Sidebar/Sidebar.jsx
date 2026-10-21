@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   IoMusicalNotes, IoHome, IoSearch, IoLibrary, IoHeart, IoTime,
-  IoFilm, IoTv, IoFlame, IoSparkles
+  IoFilm, IoTv, IoFlame, IoSparkles, IoHeadset
 } from 'react-icons/io5';
 import { usePlayer } from '../../context/PlayerContext';
 import { getMediumQualityImage, decodeHTML, getArtistNames } from '../../utils/helpers';
@@ -14,12 +14,23 @@ const musicNavItems = [
   { path: '/library', label: 'Your Library', icon: <IoLibrary /> },
 ];
 
+const browseItems = [
+  { path: '/category/new releases tamil', label: 'New Releases', icon: <IoFlame /> },
+  { path: '/charts', label: 'Top Charts', icon: <IoMusicalNotes /> },
+  { path: '/category/featured playlists tamil', label: 'Top Playlists', icon: <IoSparkles /> },
+  { path: '/podcasts', label: 'Podcasts', icon: <IoMusicalNotes /> },
+  { path: '/artists', label: 'Top Artists', icon: <IoMusicalNotes /> },
+  { path: '/radio', label: 'Radio', icon: <IoMusicalNotes /> },
+];
+
 const movieNavItems = [
   { path: '/movies', label: 'Movies Home', icon: <IoFilm /> },
   { path: '/movies/search', label: 'Search Movies', icon: <IoSearch /> },
   { path: '/movies/trending', label: 'Trending', icon: <IoFlame /> },
   { path: '/movies/tv', label: 'Web Series', icon: <IoTv /> },
 ];
+
+
 
 export default function Sidebar({ mode, setMode }) {
   const navigate = useNavigate();
@@ -51,6 +62,7 @@ export default function Sidebar({ mode, setMode }) {
         >
           <IoFilm size={14} /> Movies
         </button>
+
       </div>
 
       {/* Navigation */}
@@ -68,33 +80,58 @@ export default function Sidebar({ mode, setMode }) {
         ))}
       </nav>
 
+      {/* Browse Section */}
+      {mode === 'music' && (
+        <>
+          <div className="sidebar__section-title">BROWSE</div>
+          <nav className="sidebar__nav">
+            {browseItems.map((item) => (
+              <button
+                key={item.path}
+                className="sidebar__nav-item"
+                onClick={() => navigate(item.path)}
+              >
+                <span className="sidebar__nav-icon">{item.icon}</span>
+                {item.label}
+              </button>
+            ))}
+          </nav>
+        </>
+      )}
+
+
+
       <div className="sidebar__divider" />
 
-      {/* Quick Access (Music mode only) */}
+      {/* My Library Section */}
       {mode === 'music' && (
-        <nav className="sidebar__nav">
-          <button
-            className={`sidebar__nav-item ${location.pathname === '/liked' ? 'active' : ''}`}
-            onClick={() => navigate('/liked')}
-            id="nav-liked-songs"
-          >
-            <span className="sidebar__nav-icon"><IoHeart /></span>
-            Liked Songs
-            {likedSongs.length > 0 && (
-              <span style={{ marginLeft: 'auto', fontSize: 10, color: 'var(--text-subdued)' }}>
-                {likedSongs.length}
-              </span>
-            )}
-          </button>
-          <button
-            className={`sidebar__nav-item ${location.pathname === '/recent' ? 'active' : ''}`}
-            onClick={() => navigate('/recent')}
-            id="nav-recently-played"
-          >
-            <span className="sidebar__nav-icon"><IoTime /></span>
-            Recently Played
-          </button>
-        </nav>
+        <>
+          <div className="sidebar__section-title">MY LIBRARY</div>
+          <nav className="sidebar__nav">
+            <button
+              className={`sidebar__nav-item ${location.pathname === '/recent' ? 'active' : ''}`}
+              onClick={() => navigate('/recent')}
+            >
+              <span className="sidebar__nav-icon"><IoTime /></span>
+              History
+            </button>
+            <button
+              className={`sidebar__nav-item ${location.pathname === '/liked' ? 'active' : ''}`}
+              onClick={() => navigate('/liked')}
+            >
+              <span className="sidebar__nav-icon"><IoHeart /></span>
+              Liked Songs
+            </button>
+            <button className="sidebar__nav-item" onClick={() => navigate('/library')}>
+              <span className="sidebar__nav-icon"><IoMusicalNotes /></span>
+              Albums
+            </button>
+            <button className="sidebar__nav-item" onClick={() => navigate('/library')}>
+              <span className="sidebar__nav-icon"><IoMusicalNotes /></span>
+              Artists
+            </button>
+          </nav>
+        </>
       )}
 
       <div className="sidebar__divider" />
@@ -135,6 +172,7 @@ export default function Sidebar({ mode, setMode }) {
             Browse Tamil movies & web series
           </div>
         )}
+
       </div>
 
       {/* Footer */}

@@ -25,5 +25,9 @@ dist-ssr
 
 # Temporary and Scratch files
 scratch/
-scratch_api_test.js
+scratch*
+check_*
+temp_*
+test_*
+models*.json
 

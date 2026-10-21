@@ -50,13 +50,25 @@
 .song-row__album { font-size: 12px; color: var(--text-subdued); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 .song-row__actions { display: flex; align-items: center; gap: var(--space-md); }
-.song-row__like-btn { font-size: 16px; color: var(--text-subdued); opacity: 0; transition: all var(--transition-fast); display: flex; align-items: center; }
+.song-row__like-btn { position: relative; font-size: 16px; color: var(--text-subdued); opacity: 0; transition: all var(--transition-fast); display: flex; align-items: center; }
 .song-row:hover .song-row__like-btn { opacity: 1; }
 .song-row__like-btn.liked { color: var(--brand-primary); opacity: 1; }
 .song-row__like-btn:hover { transform: scale(1.15); }
+
+.song-row__download-btn { font-size: 16px; color: var(--text-subdued); opacity: 0; transition: all var(--transition-fast); display: flex; align-items: center; cursor: pointer; border: none; background: none; }
+.song-row:hover .song-row__download-btn { opacity: 1; }
+.song-row__download-btn.downloaded { color: var(--brand-primary); opacity: 1; }
+.song-row__download-btn.downloading { color: var(--brand-primary); opacity: 1; animation: spin 1.2s linear infinite; }
+.song-row__download-btn:hover { transform: scale(1.15); }
+
 .song-row__duration { font-size: 12px; color: var(--text-subdued); font-variant-numeric: tabular-nums; min-width: 36px; text-align: right; }
 .song-row__more-btn { font-size: 16px; color: var(--text-subdued); opacity: 0; transition: all var(--transition-fast); display: flex; align-items: center; }
 .song-row:hover .song-row__more-btn { opacity: 1; }
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
 
 /* Mobile overrides */
 @media (max-width: 768px) {
@@ -80,18 +92,29 @@
 .song-row__swipe-action {
   position: absolute;
   top: 0;
-  left: 0;
   height: 100%;
   display: flex;
   align-items: center;
-  padding-left: var(--space-md);
-  background: rgba(0, 210, 255, 0.1);
   border-radius: var(--radius-md);
   z-index: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.song-row__swipe-action--right {
+  left: 0;
+  padding-left: var(--space-md);
+  background: linear-gradient(90deg, rgba(27, 170, 120, 0.25) 0%, transparent 100%);
+}
+
+.song-row__swipe-action--left {
+  right: 0;
+  padding-right: var(--space-md);
+  background: linear-gradient(-90deg, rgba(27, 170, 120, 0.25) 0%, transparent 100%);
 }
 
 /* Feedback when queued */
 .song-row.queued {
-  background: rgba(0, 210, 255, 0.15) !important;
+  background: rgba(27, 170, 120, 0.15) !important;
   transition: background 0.3s ease;
 }

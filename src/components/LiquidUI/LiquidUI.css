@@ -1,0 +1,220 @@
+/* Liquid UI Premium Components CSS */
+
+/* --- Interactive Liquid Glass Card --- */
+.liquid-card-container {
+  perspective: 1200px;
+  display: block;
+}
+
+.liquid-card {
+  position: relative;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-xl);
+  backdrop-filter: blur(40px) saturate(210%);
+  -webkit-backdrop-filter: blur(40px) saturate(210%);
+  overflow: hidden;
+  box-shadow: 
+    0 10px 40px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15),
+    inset 0 0 20px rgba(255, 255, 255, 0.02);
+  /* Smooth mouse tracking transition, resets on mouse leave */
+  transition: transform 0.2s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.4s ease, border-color 0.4s ease;
+  transform-style: preserve-3d;
+  will-change: transform;
+  z-index: 1;
+}
+
+/* Mouse-tracking Specular Sheen Reflection */
+.liquid-card__sheen {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    circle 220px at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    rgba(255, 255, 255, 0.18) 0%,
+    rgba(255, 255, 255, 0.05) 40%,
+    transparent 80%
+  );
+  pointer-events: none;
+  z-index: 2;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.liquid-card:hover .liquid-card__sheen {
+  opacity: 1;
+}
+
+.liquid-card:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 
+    0 25px 55px rgba(0, 0, 0, 0.5),
+    0 0 40px rgba(0, 212, 255, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+
+.liquid-card-content {
+  position: relative;
+  z-index: 1;
+  transform: translateZ(15px); /* Subtly elevates content for 3D effect */
+  transition: transform 0.2s ease;
+}
+
+/* --- Interactive Liquid Button --- */
+.liquid-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 28px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-full);
+  color: var(--text-bright);
+  font-weight: 600;
+  font-size: 0.95rem;
+  letter-spacing: 0.5px;
+  backdrop-filter: blur(30px) saturate(180%);
+  -webkit-backdrop-filter: blur(30px) saturate(180%);
+  box-shadow: 
+    0 8px 24px rgba(0, 0, 0, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  transition: 
+    transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+    background 0.3s ease,
+    border-color 0.3s ease,
+    box-shadow 0.3s ease,
+    border-radius 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  overflow: hidden;
+  cursor: pointer;
+}
+
+/* Morphing fluid shape on hover */
+.liquid-btn.morphing {
+  border-radius: var(--radius-full);
+}
+
+.liquid-btn.morphing:hover {
+  animation: liquidMorph 4s ease-in-out infinite alternate;
+}
+
+.liquid-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(255,255,255,0.12) 0%, transparent 100%);
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Mouse-tracking sheen for buttons */
+.liquid-btn__sheen {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle 60px at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    rgba(255, 255, 255, 0.2) 0%,
+    transparent 100%
+  );
+  pointer-events: none;
+  z-index: 2;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.liquid-btn:hover .liquid-btn__sheen {
+  opacity: 1;
+}
+
+.liquid-btn:hover {
+  transform: translateY(-3px) scale(1.06);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.3);
+  box-shadow: 
+    0 12px 30px rgba(0, 212, 255, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+.liquid-btn:active {
+  transform: translateY(1px) scale(0.96);
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.3),
+    inset 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+/* Primary Variant */
+.liquid-btn.primary {
+  background: rgba(0, 212, 255, 0.15);
+  border-color: rgba(0, 212, 255, 0.35);
+  box-shadow: 
+    0 8px 24px rgba(0, 212, 255, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+.liquid-btn.primary:hover {
+  background: rgba(0, 212, 255, 0.26);
+  border-color: rgba(0, 212, 255, 0.5);
+  box-shadow: 
+    0 14px 35px rgba(0, 212, 255, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+/* Accent Variant */
+.liquid-btn.accent {
+  background: rgba(192, 38, 211, 0.15);
+  border-color: rgba(192, 38, 211, 0.35);
+  box-shadow: 
+    0 8px 24px rgba(192, 38, 211, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+.liquid-btn.accent:hover {
+  background: rgba(192, 38, 211, 0.26);
+  border-color: rgba(192, 38, 211, 0.5);
+  box-shadow: 
+    0 14px 35px rgba(192, 38, 211, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+@keyframes liquidMorph {
+  0% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+  33% { border-radius: 50% 50% 40% 60% / 40% 60% 50% 50%; }
+  66% { border-radius: 40% 60% 60% 40% / 60% 45% 55% 40%; }
+  100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+}
+
+/* --- SVG Gooey Fluid Effect --- */
+.liquid-gooey-container {
+  filter: url('#liquid-goo');
+}
+
+/* --- Personalized Daily Mix Cards Glassmorphic Overlays --- */
+.daily-mix-card {
+  position: relative;
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.4s ease, border-color 0.4s ease !important;
+  backdrop-filter: blur(25px) saturate(220%) !important;
+  -webkit-backdrop-filter: blur(25px) saturate(220%) !important;
+  box-shadow: 
+    0 15px 35px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    inset 0 0 30px rgba(255, 255, 255, 0.05) !important;
+}
+
+.daily-mix-card:hover {
+  transform: translateY(-5px) scale(1.03);
+  border-color: rgba(255, 255, 255, 0.25) !important;
+  box-shadow: 
+    0 25px 60px rgba(0, 0, 0, 0.55),
+    0 0 50px rgba(16, 185, 129, 0.25), /* Emerald glow matching theme */
+    inset 0 1px 0 rgba(255, 255, 255, 0.45) !important;
+}
+
+.daily-mix-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.08), transparent 60%);
+  pointer-events: none;
+}

@@ -1,3 +1,7 @@
+/* ══════════════════════════════════════════════════════
+   Player Bar — Floating Liquid Glass Capsule
+   ══════════════════════════════════════════════════════ */
+
 .player-wrapper {
   position: fixed;
   bottom: 20px;
@@ -10,9 +14,9 @@
 
 .player {
   height: 72px;
-  background: rgba(30, 0, 50, 0.75);
-  backdrop-filter: blur(40px);
-  -webkit-backdrop-filter: blur(40px);
+  background: rgba(10, 2, 22, 0.4);
+  backdrop-filter: blur(50px) saturate(220%);
+  -webkit-backdrop-filter: blur(50px) saturate(220%);
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: var(--radius-full);
   display: grid;
@@ -20,18 +24,59 @@
   align-items: center;
   padding: 0 var(--space-md);
   box-shadow:
-    0 8px 32px 0 rgba(31, 38, 135, 0.37),
-    0 10px 40px rgba(169, 16, 121, 0.35),
-    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    0 8px 40px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.2),
+    inset 0 0 20px rgba(255, 255, 255, 0.02);
   transition: all var(--transition-normal);
-  animation: float 6s ease-in-out infinite;
+  animation: float 8s ease-in-out infinite;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Top specular edge — gives that glass refraction look */
+.player::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 10%;
+  right: 10%;
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.2) 30%,
+    rgba(255, 255, 255, 0.3) 50%,
+    rgba(255, 255, 255, 0.2) 70%,
+    transparent 100%
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Subtle inner glow */
+.player::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--glass-specular-subtle);
+  pointer-events: none;
+  z-index: 0;
 }
 
 .player:hover {
   box-shadow:
-    0 8px 32px 0 rgba(31, 38, 135, 0.5),
-    0 15px 50px rgba(0, 210, 255, 0.25);
+    0 12px 48px rgba(0, 0, 0, 0.6),
+    0 0 40px rgba(0, 212, 255, 0.1),
+    0 0 0 1px rgba(255, 255, 255, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
   transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.player > * {
+  position: relative;
+  z-index: 2;
 }
 
 .player__song {
@@ -47,15 +92,19 @@
   border-radius: 50%;
   object-fit: cover;
   flex-shrink: 0;
-  box-shadow: 0 0 15px rgba(169, 16, 121, 0.5);
-  transition: transform var(--transition-normal);
-  border: 2px solid rgba(255, 255, 255, 0.1);
-  animation: spin 10s linear infinite;
+  box-shadow:
+    0 0 20px rgba(192, 38, 211, 0.3),
+    0 0 0 2px rgba(255, 255, 255, 0.08);
+  transition: all var(--transition-normal);
+  animation: spin 12s linear infinite;
   animation-play-state: paused;
 }
 
 .player__song-image.playing {
   animation-play-state: running;
+  box-shadow:
+    0 0 25px rgba(0, 212, 255, 0.35),
+    0 0 0 2px rgba(0, 212, 255, 0.15);
 }
 
 .player__song-image:hover { transform: scale(1.1); }
@@ -69,6 +118,7 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  letter-spacing: 0.1px;
 }
 
 .player__song-title:hover { text-decoration: underline; }
@@ -82,7 +132,29 @@
   margin-top: 2px;
 }
 
+/* Spotify PREVIEW badge */
+.player__preview-badge {
+  display: inline-block;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  color: #000;
+  background: #1DB954;
+  padding: 2px 6px;
+  border-radius: 3px;
+  margin-left: 8px;
+  vertical-align: middle;
+  line-height: 1;
+  animation: preview-pulse 2s ease-in-out infinite;
+}
+
+@keyframes preview-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
 .player__like-btn {
+  position: relative;
   font-size: 18px;
   color: var(--text-subdued);
   transition: all var(--transition-fast);
@@ -91,7 +163,10 @@
   align-items: center;
 }
 
-.player__like-btn.liked { color: #00d2ff; }
+.player__like-btn.liked {
+  color: var(--brand-primary);
+  filter: drop-shadow(0 0 6px var(--brand-primary-glow));
+}
 .player__like-btn:hover { transform: scale(1.15); }
 
 .mobile-only { display: none; }
@@ -119,7 +194,7 @@
   position: relative;
 }
 
-.player__control-btn:hover { color: var(--text-primary); transform: scale(1.08); }
+.player__control-btn:hover { color: var(--text-primary); transform: scale(1.1); }
 .player__control-btn.active { color: var(--brand-primary); }
 
 .player__control-btn.active::after {
@@ -132,28 +207,50 @@
   height: 4px;
   background: var(--brand-primary);
   border-radius: var(--radius-full);
-  box-shadow: 0 0 6px var(--brand-primary-glow);
+  box-shadow: 0 0 8px var(--brand-primary-glow);
 }
 
+/* Play button — liquid glass orb */
 .player__play-btn {
-  width: 40px;
-  height: 40px;
+  width: 42px;
+  height: 42px;
   border-radius: var(--radius-full);
   background: linear-gradient(135deg, var(--brand-primary), var(--brand-primary-hover));
-  color: #fff;
+  color: #08000f;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 20px;
   transition: all var(--transition-spring);
-  box-shadow: 0 0 15px var(--brand-primary-glow);
+  box-shadow:
+    0 0 20px var(--brand-primary-glow),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Specular highlight on play button */
+.player__play-btn::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: 20%;
+  right: 20%;
+  height: 50%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.4) 0%, transparent 100%);
+  border-radius: 50%;
+  pointer-events: none;
 }
 
 .player__play-btn:hover {
-  transform: scale(1.1);
-  box-shadow: 0 0 25px var(--brand-primary-glow);
+  transform: scale(1.12);
+  box-shadow:
+    0 0 30px var(--brand-primary-glow),
+    0 0 60px rgba(0, 212, 255, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
+/* Progress bar */
 .player__progress {
   display: flex;
   align-items: center;
@@ -172,45 +269,57 @@
 
 .player__progress-bar {
   flex: 1;
-  height: 4px;
-  background: rgba(255, 255, 255, 0.08);
+  height: 6px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: var(--radius-full);
   position: relative;
   cursor: pointer;
-  transition: height var(--transition-fast);
+  transition: height 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5);
 }
 
-.player__progress-bar:hover { height: 6px; }
+.player__progress-bar:hover,
+.player__progress-bar.dragging { height: 8px; }
 
 .player__progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #A91079, #00d2ff);
+  background: linear-gradient(90deg, var(--brand-accent), var(--brand-primary));
   border-radius: var(--radius-full);
   position: relative;
-  transition: width 0.1s linear;
-  box-shadow: 0 0 8px rgba(0, 210, 255, 0.5);
+  transition: none;
+  box-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
 }
 
 .player__progress-bar:hover .player__progress-fill {
-  background: linear-gradient(90deg, #A91079, #00d2ff);
-  box-shadow: 0 0 12px rgba(0, 210, 255, 0.7);
+  box-shadow: 0 0 16px rgba(0, 212, 255, 0.7);
 }
 
 .player__progress-thumb {
   position: absolute;
-  right: -6px;
+  right: -7px;
   top: 50%;
-  transform: translateY(-50%);
-  width: 12px;
-  height: 12px;
-  border-radius: var(--radius-full);
-  background: var(--text-primary);
+  transform: translateY(-50%) scale(1);
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.8);
   opacity: 0;
-  transition: opacity var(--transition-fast);
-  box-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
+  transition: opacity 0.2s, transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow:
+    0 3px 8px rgba(0, 0, 0, 0.4),
+    0 0 0 3px rgba(0, 212, 255, 0.2);
 }
 
-.player__progress-bar:hover .player__progress-thumb { opacity: 1; }
+.player__progress-bar:hover .player__progress-thumb,
+.player__progress-bar.dragging .player__progress-thumb {
+  opacity: 1;
+  transform: translateY(-50%) scale(1.1);
+}
 
 .player__extra {
   display: flex;
@@ -234,38 +343,49 @@
 
 .player__volume-bar {
   width: 90px;
-  height: 4px;
-  background: rgba(255, 255, 255, 0.08);
+  height: 6px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: var(--radius-full);
   cursor: pointer;
   position: relative;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5);
+  transition: height 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
-.player__volume-bar:hover { height: 6px; }
+.player__volume-bar:hover { height: 8px; }
 
 .player__volume-fill {
   height: 100%;
   background: var(--text-primary);
   border-radius: var(--radius-full);
   position: relative;
+  transition: background 0.2s;
 }
 
-.player__volume-bar:hover .player__volume-fill { background: var(--brand-primary); }
+.player__volume-bar:hover .player__volume-fill {
+  background: var(--brand-primary);
+  box-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+}
 
 .player__volume-thumb {
   position: absolute;
-  right: -5px;
+  right: -7px;
   top: 50%;
-  transform: translateY(-50%);
-  width: 10px;
-  height: 10px;
-  border-radius: var(--radius-full);
-  background: var(--text-primary);
+  transform: translateY(-50%) scale(1);
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.8);
   opacity: 0;
-  transition: opacity var(--transition-fast);
+  transition: opacity 0.2s, transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow:
+    0 3px 8px rgba(0, 0, 0, 0.4),
+    0 0 0 3px rgba(0, 212, 255, 0.2);
 }
 
-.player__volume-bar:hover .player__volume-thumb { opacity: 1; }
+.player__volume-bar:hover .player__volume-thumb { opacity: 1; transform: translateY(-50%) scale(1.1); }
 
 .player--empty {
   display: flex;
@@ -278,8 +398,13 @@
 /* Mobile Player */
 @media (max-width: 768px) {
   .player-wrapper {
-    bottom: calc(var(--tab-bar-height) + 15px);
+    bottom: calc(var(--tab-bar-height) + 24px);
     width: 95%;
+    transition: bottom 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+  }
+
+  body.tab-bar-hidden .player-wrapper {
+    bottom: 16px;
   }
 
   .player {
@@ -302,16 +427,32 @@
   }
 
   .player__mobile-play {
-    width: 36px;
-    height: 36px;
+    width: 38px;
+    height: 38px;
     border-radius: var(--radius-full);
-    background: #00d2ff;
-    color: #10001a;
+    background: linear-gradient(135deg, var(--brand-primary), var(--brand-primary-hover));
+    color: #08000f;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 18px;
-    box-shadow: 0 0 12px rgba(0, 210, 255, 0.4);
+    box-shadow:
+      0 0 16px rgba(0, 212, 255, 0.35),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .player__mobile-play::before {
+    content: '';
+    position: absolute;
+    top: -1px;
+    left: 20%;
+    right: 20%;
+    height: 50%;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.35) 0%, transparent 100%);
+    border-radius: 50%;
+    pointer-events: none;
   }
 }
 
@@ -323,10 +464,42 @@
 .playing-emoji {
   display: inline-block;
   animation: pulse-glow 1.5s ease-in-out infinite;
-  filter: drop-shadow(0 0 5px var(--brand-primary-glow));
+  filter: drop-shadow(0 0 6px var(--brand-primary-glow));
 }
 
 @keyframes pulse-glow {
   0%, 100% { transform: scale(1); opacity: 1; }
   50% { transform: scale(1.2); opacity: 0.8; }
+}
+
+/* ── Mobile Draggable Progress Bar ── */
+.player__mobile-progress {
+  display: none;
+  width: 100%;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 4px 4px 0 0;
+  cursor: pointer;
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+  position: relative;
+}
+
+.player__mobile-progress.dragging {
+  height: 6px;
+}
+
+.player__mobile-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--brand-accent), var(--brand-primary));
+  border-radius: 4px 0 0 0;
+  transition: none;
+  box-shadow: 0 0 8px rgba(0, 212, 255, 0.4);
+}
+
+@media (max-width: 768px) {
+  .player__mobile-progress {
+    display: block;
+  }
 }

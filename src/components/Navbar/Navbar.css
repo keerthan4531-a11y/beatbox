@@ -1,3 +1,7 @@
+/* ══════════════════════════════════════════════════════
+   Navbar — Liquid Glass Top Bar
+   ══════════════════════════════════════════════════════ */
+
 .navbar {
   height: var(--navbar-height);
   display: flex;
@@ -7,15 +11,18 @@
   position: sticky;
   top: 0;
   z-index: 20;
-  transition: background var(--transition-normal);
+  transition: all var(--transition-normal);
 }
 
 .navbar.scrolled {
-  background: rgba(16, 0, 26, 0.7);
-  backdrop-filter: blur(30px);
-  -webkit-backdrop-filter: blur(30px);
+  background: rgba(10, 2, 22, 0.4);
+  backdrop-filter: blur(50px) saturate(220%);
+  -webkit-backdrop-filter: blur(50px) saturate(220%);
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
 }
+
+
 
 .navbar__center {
   position: absolute;
@@ -29,6 +36,7 @@
   color: var(--text-primary);
   font-family: var(--font-display);
   letter-spacing: -0.3px;
+  text-shadow: 0 0 20px rgba(0, 212, 255, 0.15);
 }
 
 .navbar__right {
@@ -37,33 +45,52 @@
   gap: var(--space-sm);
 }
 
+/* Glass pill buttons */
 .navbar__icon-btn {
-  width: 36px;
-  height: 36px;
+  width: 38px;
+  height: 38px;
   border-radius: var(--radius-full);
-  background: rgba(255, 255, 255, 0.06);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 18px;
   color: var(--text-secondary);
   transition: all var(--transition-fast);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Specular highlight on button */
+.navbar__icon-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 50%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.1) 0%, transparent 100%);
+  border-radius: var(--radius-full) var(--radius-full) 0 0;
+  pointer-events: none;
 }
 
 .navbar__icon-btn:hover {
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.1);
   color: var(--text-primary);
-  border-color: rgba(0, 210, 255, 0.3);
-  box-shadow: 0 0 12px rgba(0, 210, 255, 0.2);
+  border-color: rgba(0, 212, 255, 0.25);
+  box-shadow: 0 0 16px rgba(0, 212, 255, 0.15);
+  transform: scale(1.05);
 }
 
+/* Profile button — gradient ring */
 .navbar__profile-btn {
-  width: 34px;
-  height: 34px;
+  width: 36px;
+  height: 36px;
   border-radius: var(--radius-full);
-  background: linear-gradient(135deg, #A91079, #00d2ff);
+  background: linear-gradient(135deg, var(--brand-accent), var(--brand-primary));
   color: #fff;
   display: flex;
   align-items: center;
@@ -71,12 +98,31 @@
   font-weight: 700;
   font-size: 13px;
   transition: all var(--transition-fast);
-  box-shadow: 0 0 16px rgba(0, 210, 255, 0.4);
+  box-shadow:
+    0 0 20px rgba(0, 212, 255, 0.25),
+    0 0 0 2px rgba(255, 255, 255, 0.08);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Specular on profile */
+.navbar__profile-btn::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: 15%;
+  right: 15%;
+  height: 45%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.35) 0%, transparent 100%);
+  border-radius: 50%;
+  pointer-events: none;
 }
 
 .navbar__profile-btn:hover {
   transform: scale(1.08);
-  box-shadow: 0 0 24px rgba(0, 210, 255, 0.6);
+  box-shadow:
+    0 0 30px rgba(0, 212, 255, 0.4),
+    0 0 0 2px rgba(255, 255, 255, 0.15);
 }
 
 @media (max-width: 768px) {

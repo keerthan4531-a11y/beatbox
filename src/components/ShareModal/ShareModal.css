@@ -1,0 +1,190 @@
+/* ShareModal Styles — Frosted Glass Overlay & Card Preview */
+
+.share-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(8, 0, 15, 0.7);
+  backdrop-filter: blur(25px) saturate(160%);
+  -webkit-backdrop-filter: blur(25px) saturate(160%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 11000;
+  animation: fadeInModal 0.3s ease-out;
+}
+
+.share-modal {
+  width: 90%;
+  max-width: 440px;
+  background: rgba(20, 10, 30, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-2xl);
+  box-shadow: 
+    0 25px 60px rgba(0, 0, 0, 0.65),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15),
+    inset 0 0 30px rgba(255, 255, 255, 0.02);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  max-height: 92vh;
+}
+
+.share-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-lg) var(--space-xl);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.share-modal__header h2 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-bright);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+}
+
+.share-modal__close {
+  background: none;
+  border: none;
+  color: var(--text-subdued);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s, transform 0.2s;
+  padding: 4px;
+  border-radius: 50%;
+}
+
+.share-modal__close:hover {
+  color: var(--text-bright);
+  transform: rotate(90deg);
+}
+
+.share-modal__content {
+  padding: var(--space-lg) var(--space-xl) var(--space-xl);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow-y: auto;
+  gap: var(--space-lg);
+}
+
+.share-modal__subtitle {
+  font-size: 0.85rem;
+  color: var(--text-subdued);
+  text-align: center;
+  line-height: 1.4;
+  margin: 0;
+}
+
+/* Share Card Preview */
+.share-card-preview-container {
+  width: 100%;
+  aspect-ratio: 9 / 16;
+  max-height: 48vh;
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 
+    0 15px 35px rgba(0, 0, 0, 0.5),
+    inset 0 1px 5px rgba(255,255,255,0.05);
+}
+
+.share-card-preview-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  animation: scaleInPreview 0.4s cubic-bezier(0.25, 0.8, 0.25, 1.15);
+}
+
+.share-card-preview-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-md);
+  color: var(--text-subdued);
+  font-size: 0.9rem;
+}
+
+.share-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid rgba(255, 255, 255, 0.1);
+  border-top-color: var(--brand-primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+/* Action Buttons */
+.share-modal__actions {
+  display: flex;
+  width: 100%;
+  gap: var(--space-md);
+  margin-top: 4px;
+}
+
+.share-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  padding: 12px;
+  border-radius: var(--radius-lg);
+  font-weight: 600;
+  font-size: 0.9rem;
+  border: none;
+  cursor: pointer;
+  transition: all var(--transition-spring);
+}
+
+.share-btn.download {
+  background: linear-gradient(135deg, var(--brand-primary), var(--brand-primary-hover));
+  color: #070110;
+  box-shadow: 0 4px 15px var(--brand-primary-glow);
+}
+
+.share-btn.download:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px var(--brand-primary-glow);
+}
+
+.share-btn.download:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.share-btn.instagram {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-bright);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.share-btn.instagram:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.share-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Keyframes */
+@keyframes fadeInModal {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleInPreview {
+  from { transform: scale(0.92); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}

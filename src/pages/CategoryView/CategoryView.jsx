@@ -17,18 +17,23 @@ export default function CategoryView() {
   const sortBy = location.state?.sortBy || null;
   // If navigated from an album section, show albums instead of songs
   const useAlbums = location.state?.useAlbums || false;
+  const usePlaylists = location.state?.usePlaylists || false;
 
   const [songs, setSongs] = useState([]);
   const [albums, setAlbums] = useState([]);
+  const [playlists, setPlaylists] = useState([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
-  const [viewMode, setViewMode] = useState(useAlbums ? 'albums' : 'songs');
+  const [viewMode, setViewMode] = useState(
+    useAlbums ? 'albums' : (usePlaylists ? 'playlists' : 'songs')
+  );
   const { playSong } = usePlayer();
 
   useEffect(() => {
     let mounted = true;
     setSongs([]);
     setAlbums([]);
+    setPlaylists([]);
     setPage(1);
     setLoading(true);
 
@@ -39,11 +44,47 @@ export default function CategoryView() {
           if (mounted && data?.results) {
             setAlbums(data.results);
           }
-        } else {
-          const data = await searchSongs(decodeURIComponent(query), 50, 1, sortBy);
+        } else if (viewMode === 'playlists') {
+          const data = await searchPlaylists(decodeURIComponent(query), 40);
           if (mounted && data?.results) {
-            const filtered = filterByLanguage(data.results);
-            setSongs(filtered);
+            setPlaylists(data.results);
+          }
+        } else {
+          const decodedQuery = decodeURIComponent(query);
+          const data = await searchSongs(decodedQuery, 50, 1, sortBy);
+          if (mounted && data?.results) {
+            // Skip language filter if query already targets Tamil
+            const isTamilQuery = decodedQuery.toLowerCase().includes('tamil');
+            const filtered = isTamilQuery ? data.results : filterByLanguage(data.results);
+            
+            // Fallback: if 0 results, try simpler query variants
+            if (filtered.length === 0) {
+              const words = decodedQuery.split(' ').filter(w => w.toLowerCase() !== 'tamil');
+              const fallbackQueries = [
+                words.join(' '),                          // without 'tamil'
+                `${words[0] || 'tamil'} songs`,           // first word + songs 
+                'tamil hits',                             // ultimate fallback
+              ];
+              for (const fallback of fallbackQueries) {
+                if (!mounted) break;
+                const fb = await searchSongs(fallback, 50);
+                const fbResults = isTamilQuery ? (fb?.results || []) : filterByLanguage(fb?.results || []);
+                if (fbResults.length > 0) {
+                  setSongs(fbResults);
+                  if (location.state?.autoPlay && fbResults.length > 0) {
+                    navigate(location.pathname, { replace: true, state: { ...location.state, autoPlay: false } });
+                    playSong(fbResults[0], fbResults, 0);
+                  }
+                  break;
+                }
+              }
+            } else {
+              setSongs(filtered);
+              if (location.state?.autoPlay && filtered.length > 0) {
+                navigate(location.pathname, { replace: true, state: { ...location.state, autoPlay: false } });
+                playSong(filtered[0], filtered, 0);
+              }
+            }
           }
         }
       } catch (err) {
@@ -71,7 +112,7 @@ export default function CategoryView() {
     }
     loadMore();
     return () => { mounted = false; };
-  }, [page]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [page, query, sortBy]);
 
   const handlePlayAll = () => {
     if (songs.length > 0) playSong(songs[0], songs, 0);
@@ -84,34 +125,39 @@ export default function CategoryView() {
     }
   };
 
-  if (loading && songs.length === 0 && albums.length === 0) return <Loader />;
+  if (loading && songs.length === 0 && albums.length === 0 && playlists.length === 0) return <Loader />;
 
   const getBannerUrl = (item) => {
     if (!item?.image) return '';
     if (Array.isArray(item.image)) {
       return item.image.find(i => i.quality === '500x500')?.url || item.image[item.image.length - 1]?.url || '';
     }
-    return item.image; // fallback if it's already a string
+    return item.image; 
   };
 
-  const bannerImage = viewMode === 'albums' ? getBannerUrl(albums[0]) : getBannerUrl(songs[0]);
+  const bannerImage = viewMode === 'albums' 
+    ? getBannerUrl(albums[0]) 
+    : (viewMode === 'playlists' ? getBannerUrl(playlists[0]) : getBannerUrl(songs[0]));
+
 
   return (
     <div className="category-view animate-fade-in">
       <div className="category-view__header">
         <div
           className="category-view__header-bg"
-          style={{ backgroundImage: `url(${bannerImage})` }}
+          style={{ backgroundImage: bannerImage ? `url(${bannerImage})` : 'none' }}
         />
         <div className="category-view__header-content">
-          <img className="category-view__cover" src={bannerImage} alt={title} />
+          {bannerImage && <img className="category-view__cover" src={bannerImage} alt={title} />}
           <div className="category-view__info">
-            <span className="category-view__badge">{viewMode === 'albums' ? 'Albums' : 'Playlist'}</span>
+            <span className="category-view__badge">
+              {viewMode === 'albums' ? 'Albums' : (viewMode === 'playlists' ? 'Playlists' : 'Songs')}
+            </span>
             <h1 className="category-view__title">{title}</h1>
             <p className="category-view__desc">
               {viewMode === 'albums'
                 ? `${albums.length} albums found`
-                : `Tune into the hottest tracks! Over ${songs.length} songs.`}
+                : (viewMode === 'playlists' ? `${playlists.length} playlists found` : `Over ${songs.length} songs.`)}
             </p>
           </div>
         </div>
@@ -125,24 +171,48 @@ export default function CategoryView() {
             <button className="category-view__shuffle-btn" onClick={handleShufflePlay}><IoShuffle /></button>
           </>
         )}
-        {/* Toggle: Albums ↔ Songs */}
         <div className="category-view__toggle">
+          <button
+            className={`category-view__toggle-btn${viewMode === 'playlists' ? ' active' : ''}`}
+            onClick={() => setViewMode('playlists')}
+          >
+            Playlists
+          </button>
           <button
             className={`category-view__toggle-btn${viewMode === 'albums' ? ' active' : ''}`}
             onClick={() => setViewMode('albums')}
           >
-            <IoGrid size={14} /> Albums
+            Albums
           </button>
           <button
             className={`category-view__toggle-btn${viewMode === 'songs' ? ' active' : ''}`}
             onClick={() => setViewMode('songs')}
           >
-            <IoList size={14} /> Songs
+            Songs
           </button>
         </div>
       </div>
 
-      {/* Albums grid */}
+      {/* Playlists grid */}
+      {viewMode === 'playlists' && (
+        <div className="category-view__albums-grid">
+          {playlists.map((pl, i) => (
+            <div
+              key={`${pl.id}-${i}`}
+              className="spotify-card"
+              onClick={() => navigate(`/playlist/${pl.id}`)}
+            >
+              <div className="spotify-card__img-container">
+                <img src={getBannerUrl(pl)} alt={pl.name} className="spotify-card__img" loading="lazy" />
+                <div className="spotify-card__play">▶</div>
+              </div>
+              <h4 className="spotify-card__title">{decodeHTML(pl.name || pl.title)}</h4>
+              <p className="spotify-card__desc">{pl.subtitle || 'Playlist'}</p>
+            </div>
+          ))}
+        </div>
+      )}
+
       {viewMode === 'albums' && (
         <div className="category-view__albums-grid">
           {albums.map((album, i) => (

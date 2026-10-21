@@ -1,62 +1,93 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&family=Inter:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
 
 /* ============================================
-   UX-BEAT — Glassmorphism Design System v3.0 (Violet + Sky Blue)
+   BEATBOX — Apple Liquid Glass Design System v4.0
+   Premium Glassmorphism + Liquid Glass UI
    ============================================ */
 
 :root {
-  /* Brand Colors — Violet & Sky Blue Blend */
-  --brand-primary: #00d2ff;
-  --brand-primary-hover: #3adfff;
-  --brand-primary-dim: rgba(0, 210, 255, 0.15);
-  --brand-primary-glow: rgba(0, 210, 255, 0.5);
-  --brand-accent: #A91079;
-  --brand-movie: #ff4d4d;
-  --brand-movie-dim: rgba(255, 77, 77, 0.15);
+  /* ── Brand Colors — Royal Purple & Electric Blue ── */
+  --brand-primary: #8b5cf6;
+  --brand-primary-rgb: 139, 92, 246;
+  --brand-primary-hover: #a78bfa;
+  --brand-primary-dim: rgba(139, 92, 246, 0.12);
+  --brand-primary-glow: rgba(139, 92, 246, 0.45);
+  --brand-accent: #0ea5e9;
+  --brand-accent-rgb: 14, 165, 233;
+  --brand-accent-glow: rgba(14, 165, 233, 0.35);
+  --brand-movie: #ec4899;
+  --brand-movie-dim: rgba(236, 72, 153, 0.12);
 
-  /* Background Colors — Deep Dark Nebular */
-  --bg-base: #10001a;
-  --bg-elevated: rgba(46, 2, 73, 0.4);
-  --bg-surface: rgba(255, 255, 255, 0.05);
-  --bg-surface-hover: rgba(255, 255, 255, 0.08);
-  --bg-card: rgba(255, 255, 255, 0.04);
-  --bg-card-hover: rgba(255, 255, 255, 0.07);
-  --bg-highlight: rgba(255, 255, 255, 0.1);
-  --bg-player: rgba(46, 2, 73, 0.7);
-  --bg-sidebar: rgba(46, 2, 73, 0.6);
+  /* ── Background — Deep Space Canvas ── */
+  --bg-base: #05020a;
+  --bg-elevated: rgba(20, 10, 35, 0.35);
+  --bg-surface: rgba(255, 255, 255, 0.035);
+  --bg-surface-hover: rgba(255, 255, 255, 0.065);
+  --bg-card: rgba(255, 255, 255, 0.028);
+  --bg-card-hover: rgba(255, 255, 255, 0.055);
+  --bg-highlight: rgba(255, 255, 255, 0.08);
+  --bg-player: rgba(10, 5, 20, 0.65);
+  --bg-sidebar: rgba(10, 5, 20, 0.5);
 
-  /* Liquid Glass Effects */
-  --glass-bg: rgba(255, 255, 255, 0.05);
-  --glass-bg-hover: rgba(255, 255, 255, 0.08);
-  --glass-bg-strong: rgba(255, 255, 255, 0.08);
-  --glass-border: rgba(255, 255, 255, 0.1);
-  --glass-border-hover: rgba(255, 255, 255, 0.2);
-  --glass-blur: blur(25px);
-  --glass-blur-heavy: blur(40px);
+  /* ── Liquid Glass Effects — Multi-Layer ── */
+  --glass-bg: rgba(255, 255, 255, 0.04);
+  --glass-bg-hover: rgba(255, 255, 255, 0.07);
+  --glass-bg-strong: rgba(255, 255, 255, 0.06);
+  --glass-bg-intense: rgba(255, 255, 255, 0.1);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-border-hover: rgba(255, 255, 255, 0.18);
+  --glass-border-bright: rgba(255, 255, 255, 0.25);
+  --glass-blur: blur(30px);
+  --glass-blur-heavy: blur(50px);
+  --glass-blur-ultra: blur(80px);
 
-  /* Text Colors */
-  --text-primary: #ffffff;
-  --text-secondary: rgba(255, 255, 255, 0.7);
-  --text-subdued: rgba(255, 255, 255, 0.5);
-  --text-bright: #f0f0f8;
+  /* Specular highlights (Apple Liquid Glass signature) */
+  --glass-specular: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.12) 0%,
+    rgba(255, 255, 255, 0.04) 40%,
+    rgba(255, 255, 255, 0.0) 60%,
+    rgba(255, 255, 255, 0.06) 100%
+  );
+  --glass-specular-subtle: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.08) 0%,
+    rgba(255, 255, 255, 0.02) 50%,
+    rgba(255, 255, 255, 0.04) 100%
+  );
+  --glass-specular-dynamic: radial-gradient(
+    circle 150px at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    rgba(255, 255, 255, 0.16) 0%,
+    rgba(255, 255, 255, 0.05) 50%,
+    transparent 100%
+  );
 
-  /* Gradients & Liquid Flow */
-  --gradient-sidebar: linear-gradient(180deg, #1A002E 0%, #10001A 100%);
-  --gradient-hero: linear-gradient(135deg, #2E0249 0%, #570A57 40%, #00d2ff 100%);
-  --gradient-glass: linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.05));
-  --gradient-player: linear-gradient(180deg, rgba(26, 0, 46, 0.95) 0%, rgba(16, 0, 26, 1) 100%);
-  --gradient-glow: radial-gradient(ellipse at 50% 0%, rgba(0, 210, 255, 0.3) 0%, transparent 60%);
-  --gradient-movie-glow: radial-gradient(ellipse at 50% 0%, rgba(255, 77, 77, 0.2) 0%, transparent 60%);
+  /* ── Text ── */
+  --text-primary: #f8f8ff;
+  --text-secondary: rgba(248, 248, 255, 0.72);
+  --text-subdued: rgba(248, 248, 255, 0.48);
+  --text-bright: #ffffff;
 
-  /* Shadows — Nebular Glow */
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.4);
-  --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.5);
-  --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.6);
-  --shadow-glow: 0 0 40px rgba(169, 16, 121, 0.3);
-  --shadow-glow-strong: 0 0 60px rgba(169, 16, 121, 0.5);
-  --shadow-glass: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+  /* ── Gradients — Liquid Flow ── */
+  --gradient-sidebar: linear-gradient(180deg, rgba(10, 5, 25, 0.92) 0%, rgba(5, 2, 10, 0.98) 100%);
+  --gradient-hero: linear-gradient(135deg, rgba(30, 10, 60, 0.9) 0%, rgba(20, 30, 80, 0.6) 40%, rgba(139, 92, 246, 0.3) 100%);
+  --gradient-glass: var(--glass-specular);
+  --gradient-player: linear-gradient(180deg, rgba(10, 5, 25, 0.9) 0%, rgba(5, 2, 10, 0.98) 100%);
+  --gradient-glow: radial-gradient(ellipse at 50% 0%, rgba(139, 92, 246, 0.2) 0%, transparent 60%);
+  --gradient-accent-glow: radial-gradient(ellipse at 50% 50%, rgba(14, 165, 233, 0.15) 0%, transparent 70%);
+  --gradient-aurora: linear-gradient(135deg, rgba(139, 92, 246, 0.12), rgba(14, 165, 233, 0.12));
 
-  /* Spacing */
+  /* ── Shadows — Layered Depth ── */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 4px 24px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 8px 48px rgba(0, 0, 0, 0.55);
+  --shadow-glow: 0 0 40px rgba(139, 92, 246, 0.2);
+  --shadow-glow-strong: 0 0 60px rgba(14, 165, 233, 0.35);
+  --shadow-glass: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  --shadow-glass-hover: 0 12px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  --shadow-liquid: 0 16px 48px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.04);
+
+  /* ── Spacing ── */
   --space-xs: 4px;
   --space-sm: 8px;
   --space-md: 16px;
@@ -65,31 +96,32 @@
   --space-2xl: 48px;
   --space-3xl: 64px;
 
-  /* Radius */
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 18px;
-  --radius-xl: 24px;
+  /* ── Radius ── */
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
   --radius-full: 9999px;
 
-  /* Typography */
-  --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-display: 'Outfit', 'Inter', sans-serif;
+  /* ── Typography ── */
+  --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+  --font-display: 'Outfit', 'Inter', -apple-system, sans-serif;
 
-  /* Transitions */
-  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-normal: 250ms cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-slow: 400ms cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-spring: 300ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  /* ── Transitions — Apple-smooth curves ── */
+  --transition-fast: 180ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --transition-normal: 280ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --transition-slow: 450ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --transition-spring: 350ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  --transition-liquid: 500ms cubic-bezier(0.22, 1, 0.36, 1);
 
-  /* Layout */
+  /* ── Layout ── */
   --sidebar-width: 260px;
   --player-height: 88px;
   --navbar-height: 60px;
   --tab-bar-height: 56px;
 }
 
-/* Reset & Base */
+/* ══════════ Reset & Base ══════════ */
 *,
 *::before,
 *::after {
@@ -103,6 +135,7 @@ html {
   scroll-behavior: smooth;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 body {
@@ -112,23 +145,51 @@ body {
   overflow: hidden;
   height: 100vh;
   width: 100vw;
-  overscroll-behavior-y: none; /* Prevents mobile bounce scroll effect */
-  /* Violet & Sky Blue Liquid Background Animation */
-  background: linear-gradient(45deg, #10001a, #2E0249, #001f4d, #00d2ff, #570A57);
-  background-size: 400% 400%;
-  animation: liquidBg 15s ease infinite;
+  overscroll-behavior-y: none;
+  position: relative;
 }
 
-@keyframes liquidBg {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+/* ── Liquid Aurora Background — Apple Liquid Glass style ── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 50% at 20% 40%, rgba(139, 92, 246, 0.12) 0%, transparent 50%),
+    radial-gradient(ellipse 60% 60% at 70% 20%, rgba(14, 165, 233, 0.1) 0%, transparent 50%),
+    radial-gradient(ellipse 70% 40% at 50% 80%, rgba(168, 85, 247, 0.08) 0%, transparent 50%),
+    radial-gradient(ellipse 50% 50% at 80% 70%, rgba(56, 189, 248, 0.06) 0%, transparent 40%);
+  animation: auroraShift 25s ease-in-out infinite alternate;
+  pointer-events: none;
+  z-index: 0;
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 50% 40% at 30% 60%, rgba(139, 92, 246, 0.08) 0%, transparent 50%),
+    radial-gradient(ellipse 40% 50% at 60% 30%, rgba(6, 182, 212, 0.06) 0%, transparent 50%);
+  animation: auroraShift 30s ease-in-out infinite alternate-reverse;
+  pointer-events: none;
+  z-index: 0;
+}
+
+@keyframes auroraShift {
+  0% { transform: translate(0, 0) scale(1); opacity: 1; }
+  25% { transform: translate(2%, -3%) scale(1.02); opacity: 0.9; }
+  50% { transform: translate(-1%, 2%) scale(1.05); opacity: 1; }
+  75% { transform: translate(3%, 1%) scale(0.98); opacity: 0.85; }
+  100% { transform: translate(-2%, -1%) scale(1.03); opacity: 1; }
 }
 
 #root {
   height: 100vh;
   width: 100vw;
   overflow: hidden;
+  position: relative;
+  z-index: 1;
 }
 
 a { color: inherit; text-decoration: none; }
@@ -153,53 +214,129 @@ input {
 img { display: block; max-width: 100%; }
 ul, ol { list-style: none; }
 
-/* Scrollbar */
-::-webkit-scrollbar { width: 6px; }
+/* Premium Typography Defaults */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  color: var(--text-bright);
+}
+
+/* ══════════ Scrollbar — Ultra Minimal ══════════ */
+::-webkit-scrollbar { width: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.08);
   border-radius: var(--radius-full);
 }
-::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.2); }
+::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.15); }
 
 ::selection {
-  background: var(--brand-primary);
-  color: var(--bg-base);
+  background: rgba(27, 170, 120, 0.3);
+  color: var(--text-bright);
 }
 
-/* ===== Glass Utility Classes (Apple Style) ===== */
+/* ══════════ Glass Utility Classes (Apple Liquid Glass) ══════════ */
+
+/* Standard glass panel */
 .glass-panel {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(25px);
-  -webkit-backdrop-filter: blur(25px);
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(40px) saturate(180%);
+  -webkit-backdrop-filter: blur(40px) saturate(180%);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 20px;
-  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-glass);
+  position: relative;
 }
 
+.glass-panel::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--glass-specular);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Light glass */
 .glass {
   background: var(--glass-bg);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur) saturate(180%);
+  -webkit-backdrop-filter: var(--glass-blur) saturate(180%);
   border: 1px solid var(--glass-border);
 }
 
+/* Strong glass */
 .glass-strong {
   background: var(--glass-bg-strong);
-  backdrop-filter: var(--glass-blur-heavy);
-  -webkit-backdrop-filter: var(--glass-blur-heavy);
+  backdrop-filter: var(--glass-blur-heavy) saturate(200%);
+  -webkit-backdrop-filter: var(--glass-blur-heavy) saturate(200%);
   border: 1px solid var(--glass-border);
   box-shadow: var(--shadow-glass);
+  position: relative;
 }
 
-/* ===== Animations ===== */
+.glass-strong::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--glass-specular-subtle);
+  pointer-events: none;
+}
+
+/* Liquid glass card — the signature effect */
+.glass-liquid {
+  background: rgba(255, 255, 255, 0.035);
+  backdrop-filter: blur(60px) saturate(200%);
+  -webkit-backdrop-filter: blur(60px) saturate(200%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-lg);
+  box-shadow:
+    var(--shadow-glass),
+    inset 0 0 80px rgba(255, 255, 255, 0.02);
+  position: relative;
+  overflow: hidden;
+}
+
+.glass-liquid::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--glass-specular);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.glass-liquid::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle at 30% 30%, rgba(27, 170, 120, 0.03) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+  animation: liquidRefraction 15s ease-in-out infinite;
+}
+
+@keyframes liquidRefraction {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  33% { transform: translate(5%, -5%) rotate(3deg); }
+  66% { transform: translate(-3%, 3%) rotate(-2deg); }
+}
+
+/* ══════════ Animations ══════════ */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(8px); }
+  from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes slideUp {
-  from { opacity: 0; transform: translateY(24px); }
+  from { opacity: 0; transform: translateY(30px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
@@ -224,7 +361,7 @@ ul, ol { list-style: none; }
 }
 
 @keyframes scaleIn {
-  from { opacity: 0; transform: scale(0.92); }
+  from { opacity: 0; transform: scale(0.9); }
   to { opacity: 1; transform: scale(1); }
 }
 
@@ -240,12 +377,12 @@ ul, ol { list-style: none; }
 
 @keyframes float {
   0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-6px); }
+  50% { transform: translateY(-5px); }
 }
 
 @keyframes glowPulse {
-  0%, 100% { box-shadow: 0 0 20px rgba(0, 210, 255, 0.2); }
-  50% { box-shadow: 0 0 40px rgba(0, 210, 255, 0.5); }
+  0%, 100% { box-shadow: 0 0 20px rgba(27, 170, 120, 0.15); }
+  50% { box-shadow: 0 0 40px rgba(27, 170, 120, 0.35); }
 }
 
 @keyframes liquidBg {
@@ -254,10 +391,20 @@ ul, ol { list-style: none; }
   100% { background-position: 0% 50%; }
 }
 
+@keyframes breathe {
+  0%, 100% { transform: scale(1); opacity: 0.6; }
+  50% { transform: scale(1.08); opacity: 1; }
+}
+
+@keyframes borderGlow {
+  0%, 100% { border-color: rgba(27, 170, 120, 0.15); }
+  50% { border-color: rgba(27, 170, 120, 0.3); }
+}
+
 /* Utility */
 .animate-fade-in { animation: fadeIn 0.4s ease forwards; }
 
-/* ===== Mobile Responsive ===== */
+/* ══════════ Mobile Responsive ══════════ */
 @media (max-width: 768px) {
   :root {
     --sidebar-width: 0px;
@@ -270,4 +417,35 @@ ul, ol { list-style: none; }
   :root {
     --player-height: 64px;
   }
+}
+
+/* Spring Haptic micro-interaction transitions */
+.spring-haptic {
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity var(--transition-fast) !important;
+}
+
+.spring-haptic:hover {
+  transform: scale(1.08) !important;
+}
+
+.spring-haptic:active {
+  transform: scale(0.92) !important;
+}
+
+/* Liquid Slider Styles */
+.slider-gooey-wrapper {
+  filter: url(#liquid-goo);
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* Make the thumb stretch like a droplet when dragging */
+.player__progress-bar.dragging .player__progress-thumb,
+.exp-player__progress-bar.dragging .exp-player__progress-thumb,
+.player__volume-bar:hover .player__volume-thumb {
+  transform: translateY(-50%) scaleX(1.35) scaleY(0.85) !important;
+  border-radius: 40% 60% 60% 40% / 50% 50% 50% 50% !important;
 }

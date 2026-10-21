@@ -9,6 +9,7 @@ import ArtistCard from '../../components/ArtistCard/ArtistCard';
 import AlbumCard from '../../components/AlbumCard/AlbumCard';
 import PlaylistCard from '../../components/PlaylistCard/PlaylistCard';
 import SongRow from '../../components/SongRow/SongRow';
+import SearchRow from '../../components/SearchRow/SearchRow';
 import RecentSearches from '../../components/RecentSearches/RecentSearches';
 import SectionHeader from '../../components/SectionHeader/SectionHeader';
 import Loader from '../../components/Loader/Loader';
@@ -61,14 +62,16 @@ export default function Search() {
       }
       setLoading(true);
       try {
-        const [global, songs] = await Promise.all([
+        const [global, songsData] = await Promise.all([
           globalSearch(q),
           searchSongs(q, 30),
         ]);
 
+        const songsList = songsData?.results || [];
+
         setResults({
-          topQuery: global?.topQuery?.results?.[0] || null,
-          songs: songs?.results || [],
+          topQuery: global?.topQuery?.results?.[0] || songsList[0] || null,
+          songs: songsList,
           albums: global?.albums?.results || [],
           artists: global?.artists?.results || [],
           playlists: global?.playlists?.results || [],
@@ -210,118 +213,127 @@ export default function Search() {
 
           {/* ════════════════ ALL TAB ════════════════ */}
           {activeTab === 'all' && hasResults && (
-            <>
-              {/* Top Result + Songs Row (side by side on desktop) */}
-              <div className="search-page__top-section">
-                {/* Top Result */}
-                {topResult && (
-                  <div className="search-page__top-result-col">
-                    <SectionHeader title="Top Result" />
-                    <TopResultCard
-                      item={topResult}
-                      onClick={() => {
-                        if (topResult.type === 'album') {
-                          handleAlbumClick(topResult);
-                        } else if (topResult.type === 'artist') {
-                          handleArtistClick(topResult);
-                        } else if (topResult.type === 'playlist') {
-                          handlePlaylistClick(topResult);
-                        } else if (results.songs[0]) {
-                          handlePlaySong(results.songs[0], results.songs, 0);
-                        }
-                      }}
+            <div className="search-page__grid-layout">
+              {/* Column 1: Top Result */}
+              <div className="search-page__column">
+                <SectionHeader title="TOP RESULT" />
+                <div className="search-page__column-list">
+                  {results.songs.slice(0, 3).map((item, i) => (
+                    <SearchRow
+                      key={`top-${item.id}-${i}`}
+                      item={item}
+                      type="song"
+                      onClick={() => handlePlaySong(item, results.songs, i)}
                     />
-                  </div>
-                )}
-
-                {/* Songs List (top 4) */}
-                {results.songs.length > 0 && (
-                  <div className="search-page__songs-col">
-                    <SectionHeader title="Songs" />
-                    <div className="search-page__song-list">
-                      {results.songs.slice(0, 4).map((song, i) => (
-                        <SongRow
-                          key={`${song.id}-${i}`}
-                          song={song}
-                          index={i}
-                          queue={results.songs}
-                          showAlbum={false}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                )}
+                  ))}
+                  {results.playlists.length > 0 && results.songs.length < 3 && (
+                     <SearchRow
+                        item={results.playlists[0]}
+                        type="playlist"
+                        onClick={handlePlaylistClick}
+                     />
+                  )}
+                </div>
               </div>
 
-              {/* Artists Section — Horizontal Scroll */}
-              {results.artists.length > 0 && (
-                <div className="search-page__section">
-                  <SectionHeader title="Artists" />
-                  <div className="search-page__horizontal-scroll">
-                    {results.artists.slice(0, 8).map((artist, i) => (
-                      <ArtistCard
-                        key={artist.id}
-                        artist={artist}
-                        onClick={handleArtistClick}
-                        style={{ animationDelay: `${i * 50}ms` }}
-                      />
-                    ))}
-                  </div>
+              {/* Column 2: Playlists */}
+              <div className="search-page__column">
+                <SectionHeader 
+                  title="PLAYLISTS" 
+                  actionLabel="View All" 
+                  onAction={() => handleTabChange('playlists')} 
+                />
+                <div className="search-page__column-list">
+                  {results.playlists.slice(0, 3).map((pl, i) => (
+                    <SearchRow
+                      key={`pl-${pl.id}-${i}`}
+                      item={pl}
+                      type="playlist"
+                      onClick={handlePlaylistClick}
+                    />
+                  ))}
                 </div>
-              )}
+              </div>
 
-              {/* Albums Section — Horizontal Scroll */}
-              {results.albums.length > 0 && (
-                <div className="search-page__section">
-                  <SectionHeader title="Albums" />
-                  <div className="search-page__horizontal-scroll">
-                    {results.albums.slice(0, 8).map((album, i) => (
-                      <AlbumCard
-                        key={album.id}
-                        album={album}
-                        onClick={handleAlbumClick}
-                        style={{ animationDelay: `${i * 50}ms` }}
-                      />
-                    ))}
-                  </div>
+              {/* Column 3: Songs */}
+              <div className="search-page__column">
+                <SectionHeader 
+                  title="SONGS" 
+                  actionLabel="View All" 
+                  onAction={() => handleTabChange('songs')} 
+                />
+                <div className="search-page__column-list">
+                  {results.songs.slice(0, 3).map((song, i) => (
+                    <SearchRow
+                      key={`song-${song.id}-${i}`}
+                      item={song}
+                      type="song"
+                      onClick={() => handlePlaySong(song, results.songs, i)}
+                    />
+                  ))}
                 </div>
-              )}
+              </div>
 
-              {/* Playlists Section — Horizontal Scroll */}
-              {results.playlists.length > 0 && (
-                <div className="search-page__section">
-                  <SectionHeader title="Playlists" />
-                  <div className="search-page__horizontal-scroll">
-                    {results.playlists.slice(0, 8).map((pl, i) => (
-                      <PlaylistCard
-                        key={`${pl.id}-${i}`}
-                        playlist={pl}
-                        onClick={handlePlaylistClick}
-                        style={{ animationDelay: `${i * 50}ms` }}
-                      />
-                    ))}
-                  </div>
+              {/* Column 4: Albums */}
+              <div className="search-page__column">
+                <SectionHeader 
+                  title="ALBUMS" 
+                  actionLabel="View All" 
+                  onAction={() => handleTabChange('albums')} 
+                />
+                <div className="search-page__column-list">
+                  {results.albums.slice(0, 3).map((album, i) => (
+                    <SearchRow
+                      key={`album-${album.id}-${i}`}
+                      item={album}
+                      type="album"
+                      onClick={handleAlbumClick}
+                    />
+                  ))}
                 </div>
-              )}
+              </div>
 
-              {/* More Songs — Below fold */}
-              {results.songs.length > 4 && (
-                <div className="search-page__section">
-                  <SectionHeader title="More Songs" />
-                  <div className="search-page__song-list">
-                    {results.songs.slice(4, 20).map((song, i) => (
-                      <SongRow
-                        key={`${song.id}-${i + 4}`}
-                        song={song}
-                        index={i + 4}
-                        queue={results.songs}
-                        showAlbum={true}
-                      />
-                    ))}
-                  </div>
+              {/* Second Row: Artists & More */}
+              <div className="search-page__column">
+                <SectionHeader 
+                  title="ARTISTS" 
+                  actionLabel="View All" 
+                  onAction={() => handleTabChange('artists')} 
+                />
+                <div className="search-page__column-list">
+                  {results.artists.slice(0, 3).map((artist, i) => (
+                    <SearchRow
+                      key={`artist-${artist.id}-${i}`}
+                      item={artist}
+                      type="artist"
+                      onClick={handleArtistClick}
+                    />
+                  ))}
                 </div>
-              )}
-            </>
+              </div>
+
+              <div className="search-page__column">
+                <SectionHeader 
+                  title="PODCASTS" 
+                  actionLabel="View All" 
+                  onAction={() => {}} 
+                />
+                <div className="search-page__column-list">
+                  {/* Podcasts usually come from a different API, showing some more playlists as placeholder */}
+                  {results.playlists.slice(3, 6).map((pl, i) => (
+                    <SearchRow
+                      key={`podcast-pl-${pl.id}-${i}`}
+                      item={pl}
+                      type="playlist"
+                      onClick={handlePlaylistClick}
+                    />
+                  ))}
+                  {results.playlists.length < 4 && (
+                    <div className="search-page__empty-col">No podcasts available</div>
+                  )}
+                </div>
+              </div>
+            </div>
           )}
 
           {/* ════════════════ SONGS TAB ════════════════ */}

@@ -1,6 +1,7 @@
 import React from 'react';
 import { IoPlay } from 'react-icons/io5';
 import { getHighQualityImage, decodeHTML } from '../../utils/helpers';
+import LiquidCard from '../LiquidUI/LiquidCard';
 import './AlbumCard.css';
 
 export default function AlbumCard({ album, onClick, style }) {
@@ -12,27 +13,30 @@ export default function AlbumCard({ album, onClick, style }) {
   const year = album.year || '';
 
   return (
-    <div
-      className="album-card"
+    <LiquidCard
       onClick={() => onClick && onClick(album)}
       style={style}
-      id={`album-card-${album.id}`}
     >
-      <div className="album-card__image-wrapper">
-        <img
-          className="album-card__image"
-          src={image}
-          alt={title}
-          loading="lazy"
-        />
-        <button className="album-card__play" aria-label="Play">
-          <IoPlay />
-        </button>
+      <div
+        className="album-card"
+        id={`album-card-${album.id}`}
+      >
+        <div className="album-card__image-wrapper">
+          <img
+            className="album-card__image"
+            src={image}
+            alt={title}
+            loading="lazy"
+          />
+          <button className="album-card__play" aria-label="Play">
+            <IoPlay />
+          </button>
+        </div>
+        <p className="album-card__title">{title}</p>
+        <p className="album-card__meta">
+          {year ? `${year} • ` : ''}{artist}
+        </p>
       </div>
-      <p className="album-card__title">{title}</p>
-      <p className="album-card__meta">
-        {year ? `${year} • ` : ''}{artist}
-      </p>
-    </div>
+    </LiquidCard>
   );
 }

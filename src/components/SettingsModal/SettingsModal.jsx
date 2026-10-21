@@ -1,10 +1,12 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { usePlayer } from '../../context/PlayerContext';
 import { IoClose, IoCloudOfflineOutline, IoLogOutOutline, IoInformationCircleOutline } from 'react-icons/io5';
 import AboutModal from '../AboutModal/AboutModal';
 import './SettingsModal.css';
 
 export default function SettingsModal({ onClose }) {
+  const navigate = useNavigate();
   const { 
     userProfile, logout, dataSaver, toggleDataSaver,
     audioQuality, crossfade, gapless,
@@ -37,7 +39,14 @@ export default function SettingsModal({ onClose }) {
 
         <div className="settings-modal__content">
           {userProfile && (
-            <div className="settings-modal__profile">
+            <div 
+              className="settings-modal__profile" 
+              onClick={() => {
+                navigate(`/user/${userProfile?.uid || 'local_user'}`);
+                onClose();
+              }}
+              style={{ cursor: 'pointer' }}
+            >
               <img src={userProfile.avatar} alt="Profile" className="settings-modal__avatar" />
               <div className="settings-modal__user-info">
                 <h3>{userProfile.name}</h3>

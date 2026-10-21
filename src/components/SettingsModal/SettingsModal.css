@@ -1,34 +1,55 @@
+/* ══════════════════════════════════════════════════════
+   Settings Modal — Liquid Glass Panel
+   ══════════════════════════════════════════════════════ */
+
 .settings-modal-overlay {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(5px);
-  -webkit-backdrop-filter: blur(5px);
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 10000;
   padding: var(--space-md);
-  animation: fadeIn 0.2s ease;
+  animation: fadeIn 0.25s ease;
 }
 
 .settings-modal {
   width: 100%;
   max-width: 400px;
-  background: #181818;
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--glass-border);
-  box-shadow: var(--shadow-xl);
+  background: rgba(15, 2, 28, 0.85);
+  backdrop-filter: blur(60px) saturate(200%);
+  -webkit-backdrop-filter: blur(60px) saturate(200%);
+  border-radius: var(--radius-xl);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow:
+    0 24px 64px rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
   display: flex;
   flex-direction: column;
   max-height: 90vh;
-  animation: slideUp 0.3s ease;
+  animation: slideUp 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Specular glass highlight */
+.settings-modal::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--glass-specular-subtle);
+  pointer-events: none;
+  z-index: 0;
 }
 
 @media (max-width: 768px) {
   .settings-modal {
     max-height: 85vh;
-    background: #181818; /* Solid dark background */
+    background: rgba(8, 0, 15, 0.92);
   }
 }
 
@@ -37,25 +58,31 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid var(--border-subtle);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  position: relative;
+  z-index: 1;
 }
 
 .settings-modal__header h2 {
+  font-family: var(--font-display);
   font-size: 20px;
   font-weight: 700;
   color: var(--text-primary);
   margin: 0;
+  letter-spacing: -0.3px;
 }
 
 .settings-modal__close {
-  background: transparent;
+  background: rgba(255, 255, 255, 0.05);
   color: var(--text-secondary);
   padding: 8px;
   border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  transition: all var(--transition-fast);
 }
 
 .settings-modal__close:hover {
-  background: var(--glass-bg-hover);
+  background: rgba(255, 255, 255, 0.1);
   color: var(--text-primary);
 }
 
@@ -65,6 +92,8 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-xl);
+  position: relative;
+  z-index: 1;
 }
 
 .settings-modal__profile {
@@ -72,8 +101,9 @@
   align-items: center;
   gap: var(--space-md);
   padding: var(--space-md);
-  background: var(--glass-bg-hover);
-  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .settings-modal__avatar {
@@ -81,12 +111,15 @@
   height: 60px;
   border-radius: 50%;
   object-fit: cover;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  border: 2px solid rgba(255, 255, 255, 0.08);
 }
 
 .settings-modal__user-info h3 {
   font-size: 18px;
   margin: 0 0 4px 0;
   color: var(--text-primary);
+  font-weight: 700;
 }
 
 .settings-modal__user-info p {
@@ -96,11 +129,12 @@
 }
 
 .settings-modal__section-title {
-  font-size: 12px;
+  font-size: 11px;
   text-transform: uppercase;
   color: var(--text-subdued);
   margin: 0 0 var(--space-md) 0;
-  letter-spacing: 1px;
+  letter-spacing: 1.5px;
+  font-weight: 700;
 }
 
 .settings-modal__item {
@@ -128,15 +162,15 @@
 .settings-modal__item-desc {
   font-size: 12px;
   color: var(--text-subdued);
-  line-height: 1.4;
+  line-height: 1.5;
 }
 
-/* Toggle Switch */
+/* Toggle Switch — Liquid Glass */
 .settings-modal__switch {
   position: relative;
   display: inline-block;
-  width: 44px;
-  height: 24px;
+  width: 46px;
+  height: 26px;
   flex-shrink: 0;
 }
 
@@ -150,25 +184,29 @@
   position: absolute;
   cursor: pointer;
   top: 0; left: 0; right: 0; bottom: 0;
-  background-color: var(--glass-border-hover);
-  transition: .4s;
-  border-radius: 24px;
+  background-color: rgba(255, 255, 255, 0.12);
+  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  border-radius: 26px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .settings-modal__slider:before {
   position: absolute;
   content: "";
-  height: 18px;
-  width: 18px;
+  height: 20px;
+  width: 20px;
   left: 3px;
-  bottom: 3px;
+  bottom: 2px;
   background-color: white;
-  transition: .4s;
+  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
   border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 input:checked + .settings-modal__slider {
-  background-color: var(--brand-primary);
+  background: linear-gradient(135deg, var(--brand-primary), var(--brand-accent));
+  border-color: transparent;
+  box-shadow: 0 0 12px rgba(0, 212, 255, 0.2);
 }
 
 input:checked + .settings-modal__slider:before {
@@ -177,25 +215,35 @@ input:checked + .settings-modal__slider:before {
 
 .settings-modal__quality-btns {
   display: flex;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.04);
   padding: 4px;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   gap: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .quality-btn {
-  padding: 6px 12px;
-  border-radius: 6px;
+  padding: 7px 14px;
+  border-radius: var(--radius-sm);
   font-size: 12px;
   font-weight: 700;
   color: var(--text-secondary);
   background: transparent;
-  transition: all 0.2s;
+  transition: all var(--transition-fast);
+  letter-spacing: 0.3px;
+}
+
+.quality-btn:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.04);
 }
 
 .quality-btn.active {
-  background: var(--brand-primary);
-  color: #10001a;
+  background: linear-gradient(135deg, var(--brand-primary), var(--brand-primary-hover));
+  color: #08000f;
+  box-shadow:
+    0 2px 8px rgba(0, 212, 255, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
 .settings-modal__about-btn {
@@ -206,18 +254,35 @@ input:checked + .settings-modal__slider:before {
   gap: 8px;
   padding: 14px;
   border-radius: var(--radius-full);
-  background: linear-gradient(to right, #4361ee, #7209b7);
+  background: linear-gradient(135deg, var(--brand-accent), var(--brand-primary));
   border: none;
   color: #fff;
   font-size: 15px;
   font-weight: 600;
-  transition: all 0.2s;
-  box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3);
+  transition: all var(--transition-fast);
+  box-shadow:
+    0 4px 20px rgba(0, 212, 255, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  position: relative;
+  overflow: hidden;
+}
+
+.settings-modal__about-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 50%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.2) 0%, transparent 100%);
+  pointer-events: none;
 }
 
 .settings-modal__about-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(67, 97, 238, 0.4);
+  box-shadow:
+    0 6px 28px rgba(0, 212, 255, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
 
 .settings-modal__logout-btn {
@@ -228,16 +293,21 @@ input:checked + .settings-modal__slider:before {
   gap: 8px;
   padding: 14px;
   border-radius: var(--radius-full);
-  background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   color: var(--text-primary);
   font-size: 15px;
   font-weight: 600;
-  transition: all 0.2s;
+  transition: all var(--transition-fast);
+}
+
+.settings-modal__logout-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.15);
 }
 
 @keyframes slideUp {
-  from { transform: translateY(20px); opacity: 0; }
+  from { transform: translateY(24px); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
 }
 

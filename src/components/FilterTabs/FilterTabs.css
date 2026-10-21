@@ -1,4 +1,7 @@
-/* ===== Filter Tabs — Spotify Pill Style ===== */
+/* ══════════════════════════════════════════════════════
+   Filter Tabs — Liquid Glass Pills
+   ══════════════════════════════════════════════════════ */
+
 .filter-tabs {
   display: flex;
   gap: var(--space-sm);
@@ -14,33 +17,40 @@
 }
 
 .filter-tabs__tab {
-  padding: 8px 18px;
+  padding: 9px 20px;
   border-radius: var(--radius-full);
   font-size: 13px;
   font-weight: 600;
   white-space: nowrap;
-  color: var(--text-primary);
-  background: rgba(255, 255, 255, 0.07);
-  border: none;
+  color: var(--text-secondary);
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
   cursor: pointer;
   transition: all var(--transition-fast);
   flex-shrink: 0;
-  letter-spacing: 0.2px;
+  letter-spacing: 0.3px;
 }
 
 .filter-tabs__tab:hover {
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
 }
 
 .filter-tabs__tab.active {
-  background: var(--text-primary);
+  background: rgba(255, 255, 255, 0.92);
   color: var(--bg-base);
+  border-color: transparent;
+  box-shadow:
+    0 2px 12px rgba(0, 0, 0, 0.2),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.05);
 }
 
 /* Mobile */
 @media (max-width: 768px) {
   .filter-tabs__tab {
-    padding: 7px 14px;
+    padding: 7px 15px;
     font-size: 12px;
   }
 }

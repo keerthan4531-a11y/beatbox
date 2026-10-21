@@ -1,11 +1,11 @@
-/* =====================================================
-   Login Page — Premium Onboarding Flow
-   ===================================================== */
+/* ══════════════════════════════════════════════════════
+   Login Page — Premium Liquid Glass Onboarding
+   ══════════════════════════════════════════════════════ */
 
 .login-page {
   position: fixed;
   inset: 0;
-  background: #08001a;
+  background: #030f0a;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -20,14 +20,14 @@
   position: fixed;
   border-radius: 50%;
   pointer-events: none;
-  filter: blur(80px);
+  filter: blur(100px);
   z-index: 0;
 }
 
 .login-page__orb--1 {
   width: 400px;
   height: 400px;
-  background: radial-gradient(circle, rgba(169, 16, 121, 0.35) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(27, 170, 120, 0.3) 0%, transparent 70%);
   top: -100px;
   right: -80px;
   animation: float 10s ease-in-out infinite;
@@ -36,7 +36,7 @@
 .login-page__orb--2 {
   width: 300px;
   height: 300px;
-  background: radial-gradient(circle, rgba(0, 210, 255, 0.3) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.25) 0%, transparent 70%);
   bottom: -60px;
   left: -60px;
   animation: float 12s ease-in-out infinite reverse;
@@ -45,28 +45,48 @@
 .login-page__orb--3 {
   width: 200px;
   height: 200px;
-  background: radial-gradient(circle, rgba(124, 77, 255, 0.25) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(52, 209, 153, 0.2) 0%, transparent 70%);
   top: 40%;
   left: 50%;
   animation: float 8s ease-in-out infinite 2s;
 }
 
-/* ── Container ── */
+/* ── Container — Liquid Glass Card ── */
 .login-page__container {
   position: relative;
   z-index: 1;
   width: 100%;
   max-width: 420px;
-  background: rgba(255, 255, 255, 0.04);
-  backdrop-filter: blur(40px);
-  -webkit-backdrop-filter: blur(40px);
+  background: rgba(255, 255, 255, 0.035);
+  backdrop-filter: blur(50px) saturate(200%);
+  -webkit-backdrop-filter: blur(50px) saturate(200%);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 28px;
+  border-radius: var(--radius-xl);
   padding: var(--space-2xl) var(--space-xl);
-  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5), 0 0 60px rgba(169, 16, 121, 0.1);
+  box-shadow:
+    0 24px 80px rgba(0, 0, 0, 0.5),
+    0 0 60px rgba(27, 170, 120, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
   display: flex;
   flex-direction: column;
   gap: var(--space-lg);
+  overflow: hidden;
+}
+
+/* Specular overlay */
+.login-page__container::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--glass-specular);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.login-page__container > * {
+  position: relative;
+  z-index: 1;
 }
 
 .login-page__container--wide {
@@ -78,7 +98,7 @@
 
 /* ── Slide In Animation ── */
 .login-page__slide-in {
-  animation: loginSlideIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  animation: loginSlideIn 0.5s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 @keyframes loginSlideIn {
@@ -120,7 +140,7 @@
 .login-page__desc {
   font-size: 13px;
   color: var(--text-subdued);
-  line-height: 1.5;
+  line-height: 1.6;
 }
 
 /* ── Form ── */
@@ -141,17 +161,18 @@
   font-weight: 700;
   color: var(--text-primary);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.8px;
 }
 
 .login-page__input-group input {
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   padding: 14px 16px;
   border-radius: var(--radius-md);
   color: var(--text-primary);
   font-size: 15px;
   transition: all var(--transition-fast);
+  backdrop-filter: blur(10px);
 }
 
 .login-page__input-group input::placeholder {
@@ -160,18 +181,18 @@
 
 .login-page__input-group input:focus {
   outline: none;
-  border-color: var(--brand-primary);
-  background: rgba(0, 210, 255, 0.06);
-  box-shadow: 0 0 0 3px rgba(0, 210, 255, 0.12);
+  border-color: rgba(27, 170, 120, 0.4);
+  background: rgba(27, 170, 120, 0.04);
+  box-shadow: 0 0 0 3px rgba(27, 170, 120, 0.08);
 }
 
-/* ── Submit Button ── */
+/* ── Submit Button — Liquid Glass ── */
 .login-page__submit {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: var(--space-sm);
-  background: linear-gradient(135deg, #00d2ff, #a855f7);
+  background: linear-gradient(135deg, var(--brand-primary), var(--brand-accent));
   color: #fff;
   font-weight: 700;
   font-size: 16px;
@@ -179,14 +200,31 @@
   border-radius: var(--radius-full);
   margin-top: var(--space-xs);
   transition: all var(--transition-fast);
-  box-shadow: 0 4px 20px rgba(0, 210, 255, 0.3);
+  box-shadow:
+    0 4px 24px rgba(27, 170, 120, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
   border: none;
   cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.login-page__submit::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 50%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.2) 0%, transparent 100%);
+  pointer-events: none;
 }
 
 .login-page__submit:hover {
   transform: scale(1.02);
-  box-shadow: 0 6px 30px rgba(0, 210, 255, 0.4);
+  box-shadow:
+    0 6px 32px rgba(27, 170, 120, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
 .login-page__submit:active {
@@ -202,21 +240,21 @@
   font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 1.5px;
 }
 
 .login-page__divider::before,
 .login-page__divider::after {
   content: '';
   flex: 1;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .login-page__divider span {
   padding: 0 var(--space-md);
 }
 
-/* ── Social Buttons ── */
+/* ── Social Buttons — Glass Pills ── */
 .login-page__social {
   display: flex;
   gap: var(--space-sm);
@@ -228,8 +266,9 @@
   align-items: center;
   justify-content: center;
   gap: var(--space-sm);
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   color: var(--text-primary);
   padding: 13px;
   border-radius: var(--radius-full);
@@ -240,8 +279,8 @@
 }
 
 .login-page__social-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.15);
 }
 
 /* ── Footer ── */
@@ -269,7 +308,7 @@
 }
 
 .login-page__toggle-btn:hover {
-  color: #3adfff;
+  color: var(--brand-primary-hover);
 }
 
 /* ══════════════════════════════════════════
@@ -282,10 +321,12 @@
 }
 
 .login-page__back-btn {
-  width: 40px;
-  height: 40px;
+  width: 42px;
+  height: 42px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -293,22 +334,22 @@
   color: var(--text-primary);
   cursor: pointer;
   transition: all var(--transition-fast);
-  border: none;
 }
 
 .login-page__back-btn:hover {
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .login-page__step-badge {
   padding: 5px 14px;
   border-radius: var(--radius-full);
-  background: rgba(0, 210, 255, 0.1);
+  background: rgba(27, 170, 120, 0.08);
+  border: 1px solid rgba(27, 170, 120, 0.2);
   color: var(--brand-primary);
   font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.8px;
+  letter-spacing: 1px;
 }
 
 .login-page__step-title {
@@ -319,21 +360,22 @@
   display: flex;
   align-items: center;
   gap: var(--space-sm);
+  letter-spacing: -0.3px;
 }
 
 .login-page__sparkle {
-  color: #ffd700;
+  color: var(--brand-primary);
   font-size: 24px;
 }
 
 .login-page__step-desc {
   font-size: 14px;
   color: var(--text-subdued);
-  line-height: 1.5;
+  line-height: 1.6;
 }
 
 /* ══════════════════════════════════════════
-   LANGUAGE CARDS (Step 1)
+   LANGUAGE CARDS (Step 1) — Liquid Glass
    ══════════════════════════════════════════ */
 .login-page__lang-grid {
   display: grid;
@@ -350,7 +392,7 @@
   gap: 4px;
   padding: var(--space-lg) var(--space-md);
   border-radius: var(--radius-lg);
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(255, 255, 255, 0.03);
   border: 2px solid transparent;
   cursor: pointer;
   transition: all var(--transition-normal);
@@ -368,16 +410,17 @@
 }
 
 .login-page__lang-card:hover::before {
-  opacity: 0.1;
+  opacity: 0.08;
 }
 
 .login-page__lang-card.selected {
   border-color: var(--lang-color);
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.05);
+  box-shadow: 0 0 20px color-mix(in srgb, var(--lang-color, #1baa78) 20%, transparent);
 }
 
 .login-page__lang-card.selected::before {
-  opacity: 0.15;
+  opacity: 0.12;
 }
 
 .login-page__lang-check {
@@ -387,7 +430,7 @@
   font-size: 22px;
   color: var(--lang-color);
   z-index: 2;
-  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.4));
 }
 
 .login-page__lang-local {
@@ -403,7 +446,7 @@
   font-weight: 600;
   color: var(--text-subdued);
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 1.5px;
   z-index: 1;
   position: relative;
 }
@@ -417,34 +460,49 @@
   width: 100%;
   padding: 16px;
   border-radius: var(--radius-full);
-  background: linear-gradient(135deg, #00d2ff, #a855f7);
+  background: linear-gradient(135deg, var(--brand-primary), var(--brand-accent));
   color: #fff;
   font-weight: 700;
   font-size: 16px;
   cursor: pointer;
   transition: all var(--transition-fast);
-  box-shadow: 0 4px 20px rgba(0, 210, 255, 0.25);
+  box-shadow:
+    0 4px 20px rgba(27, 170, 120, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
   border: none;
   margin-top: var(--space-sm);
+  position: relative;
+  overflow: hidden;
+}
+
+.login-page__next-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 50%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.15) 0%, transparent 100%);
+  pointer-events: none;
 }
 
 .login-page__next-btn:disabled {
-  opacity: 0.35;
+  opacity: 0.3;
   cursor: not-allowed;
   box-shadow: none;
 }
 
 .login-page__next-btn:not(:disabled):hover {
   transform: scale(1.02);
-  box-shadow: 0 6px 30px rgba(0, 210, 255, 0.4);
+  box-shadow: 0 6px 30px rgba(27, 170, 120, 0.35);
 }
 
 /* ══════════════════════════════════════════
-   ARTIST & MOOD CARDS (Step 2)
+   ARTIST & MOOD CARDS (Step 2) — Liquid Glass
    ══════════════════════════════════════════ */
 .login-page__pref-section {
   padding: var(--space-md) 0;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .login-page__pref-lang-title {
@@ -475,8 +533,8 @@
 }
 
 .login-page__artist-card.selected {
-  background: rgba(30, 215, 96, 0.08);
-  border-color: #1ed760;
+  background: rgba(27, 170, 120, 0.06);
+  border-color: var(--brand-primary);
 }
 
 .login-page__artist-img-wrap {
@@ -485,7 +543,8 @@
   height: 80px;
   border-radius: 50%;
   overflow: hidden;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.45);
+  border: 2px solid rgba(255, 255, 255, 0.06);
 }
 
 .login-page__artist-img {
@@ -502,7 +561,8 @@
 .login-page__artist-check-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(30, 215, 96, 0.4);
+  background: rgba(27, 170, 120, 0.3);
+  backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -521,7 +581,7 @@
   max-width: 100%;
 }
 
-/* ── Mood Chips ── */
+/* ── Mood Chips — Glass Pills ── */
 .login-page__pref-mood-title {
   font-size: 14px;
   font-weight: 600;
@@ -541,8 +601,9 @@
   gap: 6px;
   padding: 10px 18px;
   border-radius: var(--radius-full);
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   color: var(--text-primary);
   font-size: 13px;
   font-weight: 600;
@@ -551,20 +612,21 @@
 }
 
 .login-page__mood-chip:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .login-page__mood-chip.selected {
-  background: rgba(0, 210, 255, 0.12);
+  background: rgba(27, 170, 120, 0.08);
   border-color: var(--lang-color, var(--brand-primary));
   color: var(--lang-color, var(--brand-primary));
+  box-shadow: 0 0 12px rgba(27, 170, 120, 0.1);
 }
 
 .login-page__mood-emoji {
   font-size: 16px;
 }
 
-/* ── Finish Button ── */
+/* ── Finish Button — Liquid Glass CTA ── */
 .login-page__finish-btn {
   display: flex;
   align-items: center;
@@ -573,21 +635,38 @@
   width: 100%;
   padding: 18px;
   border-radius: var(--radius-full);
-  background: linear-gradient(135deg, #1ed760, #00d2ff);
-  color: #000;
+  background: linear-gradient(135deg, var(--brand-primary), var(--brand-accent));
+  color: #fff;
   font-weight: 800;
   font-size: 17px;
   cursor: pointer;
   transition: all var(--transition-fast);
-  box-shadow: 0 4px 24px rgba(30, 215, 96, 0.3);
+  box-shadow:
+    0 4px 24px rgba(27, 170, 120, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
   border: none;
   margin-top: var(--space-md);
   letter-spacing: 0.3px;
+  position: relative;
+  overflow: hidden;
+}
+
+.login-page__finish-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 50%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.2) 0%, transparent 100%);
+  pointer-events: none;
 }
 
 .login-page__finish-btn:hover {
   transform: scale(1.02);
-  box-shadow: 0 8px 36px rgba(30, 215, 96, 0.4);
+  box-shadow:
+    0 8px 36px rgba(27, 170, 120, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
 .login-page__finish-btn:active {

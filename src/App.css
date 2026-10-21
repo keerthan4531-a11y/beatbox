@@ -1,9 +1,14 @@
+/* ══════════ App Layout — Liquid Glass Shell ══════════ */
+
 .app {
   display: flex;
   height: 100vh;
   width: 100vw;
   overflow: hidden;
-  background: var(--bg-base);
+  background: transparent;
+  position: relative;
+  padding: 16px;
+  gap: 16px;
 }
 
 .app__main-wrapper {
@@ -12,6 +17,12 @@
   flex-direction: column;
   overflow: hidden;
   position: relative;
+  background: rgba(10, 2, 22, 0.25);
+  backdrop-filter: blur(40px) saturate(210%);
+  -webkit-backdrop-filter: blur(40px) saturate(210%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-xl);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.45);
 }
 
 .app__content-area {
@@ -29,16 +40,18 @@
   overscroll-behavior-y: none;
 }
 
-/* Ambient glow */
+/* Ambient glow — softer diffused light from album art */
 .app__ambient {
   position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 360px;
-  opacity: 0.2;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 420px;
+  opacity: 0.18;
   pointer-events: none;
-  transition: background var(--transition-slow);
+  transition: background 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   z-index: 0;
-  filter: blur(100px);
+  filter: blur(120px) saturate(180%);
 }
 
 .app__main-content > *:not(.app__ambient) {
@@ -48,8 +61,19 @@
 
 /* Mobile adjustments */
 @media (max-width: 768px) {
+  .app {
+    padding: 0;
+    gap: 0;
+  }
+
+  .app__main-wrapper {
+    border-radius: 0;
+    border: none;
+    background: transparent;
+    box-shadow: none;
+  }
+
   .app__main-content {
-    /* Large padding to clear BOTH the tab bar and the floating pill player */
     padding-bottom: calc(var(--tab-bar-height) + 120px);
   }
 }

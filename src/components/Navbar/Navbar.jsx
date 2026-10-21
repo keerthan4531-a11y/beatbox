@@ -43,7 +43,7 @@ export default function Navbar() {
         <button className="navbar__icon-btn" onClick={() => toggleSettings()} aria-label="Settings">
           <IoSettingsOutline />
         </button>
-        <button className="navbar__profile-btn" id="profile-btn" onClick={() => toggleSettings()} aria-label="User profile">
+        <button className="navbar__profile-btn" id="profile-btn" onClick={() => navigate(`/user/${userProfile?.uid || 'local_user'}`)} aria-label="User profile">
           {userProfile?.avatar ? (
             <img src={userProfile.avatar} alt="Profile" style={{ width: '100%', height: '100%', borderRadius: '50%' }} />
           ) : (

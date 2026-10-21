@@ -1,26 +1,27 @@
 /**
- * Home.jsx — Spotify-style Personalized Home
+ * Home.jsx — JioSaavn-powered Tamil Music Hub
  *
- * How it works (just like real Spotify):
- *  1. Reads user's recentlyPlayed + likedSongs from PlayerContext
- *  2. Runs buildTasteProfile() to detect fav artists, moods, language
- *  3. Generates personalised sections via getPersonalisedSections()
- *  4. Album sections → fetch real albums using searchAlbums() → click → /album/:id → see all songs
- *  5. Song sections  → fetch songs with filterByLanguage() to strip non-Tamil results
- *  6. "Made For You" artist albums always appear at the top (if history exists)
- *  7. Jump Back In → recently played songs (quick pill row)
+ * How it works:
+ *  1. Fetches REAL Tamil homepage data from JioSaavn via getHomepageData()
+ *  2. Shows: New Tamil Releases, Featured Playlists, Tamil Charts, Genres
+ *  3. Keeps personalised sections from userTaste engine
+ *  4. Jump Back In → recently played songs
+ *  5. Click any playlist → /playlist/:id → see all songs
+ *  6. Click any album → /album/:id
  */
 
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { searchSongs, searchAlbums } from '../../api/saavn';
+import { getHomepageData, searchSongs, searchAlbums, getDailyMixes } from '../../api/saavn';
 import { usePlayer } from '../../context/PlayerContext';
 import AlbumCard from '../../components/AlbumCard/AlbumCard';
 import SongCard from '../../components/SongCard/SongCard';
 import SectionHeader from '../../components/SectionHeader/SectionHeader';
+import Stories from '../../components/Stories/Stories';
 import Loader from '../../components/Loader/Loader';
 import { getMediumQualityImage, decodeHTML, getHighQualityImage } from '../../utils/helpers';
 import { buildTasteProfile, getPersonalisedSections, filterByLanguage } from '../../utils/userTaste';
+import LiquidCard from '../../components/LiquidUI/LiquidCard';
 import './Home.css';
 
 function getGreeting() {
@@ -30,29 +31,35 @@ function getGreeting() {
   return 'Good Evening 🌙';
 }
 
-// ── Spotify "Made For You" curated album playlists (always show, cover from real album art) ──
-const FEATURED_PLAYLISTS = [
-  { id: 'anirudh_top',    title: 'Anirudh Hits',         desc: 'Best of Anirudh Ravichander',         query: 'anirudh ravichander album' },
-  { id: 'arrahman_top',   title: 'A.R. Rahman',          desc: 'Timeless Rahman albums',              query: 'ar rahman tamil album' },
-  { id: 'yuvan_top',      title: 'Yuvan Shankar Raja',   desc: 'The Yuvan touch',                     query: 'yuvan shankar raja album' },
-  { id: 'harris_top',     title: 'Harris Jayaraj',       desc: 'Harris magic collection',             query: 'harris jayaraj album' },
-  { id: 'imman_top',      title: 'D. Imman Albums',      desc: 'D. Imman\'s best scores',             query: 'd imman album' },
-  { id: 'ilaiyaraaja_top',title: 'Ilaiyaraaja Classics', desc: 'Legends never die',                   query: 'ilaiyaraaja album' },
-  { id: 'kuthu_pl',       title: 'Item Vibezzz 🔥',      desc: 'Kuthu songs for party nights',        query: 'tamil kuthu party album' },
-  { id: 'melody_pl',      title: 'Tamil Melody Mix',     desc: 'Pure melody vibes',                   query: 'tamil melody album' },
-  { id: 'trending_new',   title: 'New Releases 2025',    desc: 'What\'s hot right now',               query: 'new tamil album 2025' },
-  { id: 'vijay_pl',       title: 'Thalapathy Vijay',     desc: 'Vijay mass + melody',                 query: 'vijay thalapathy album' },
-  { id: 'ajith_pl',       title: 'Thala Ajith',          desc: 'Ajith hits collection',               query: 'ajith kumar album' },
-  { id: 'gvprakash_pl',   title: 'G.V. Prakash',         desc: 'GV\'s musical journey',              query: 'gv prakash kumar album' },
-];
-
 export default function Home() {
   const navigate = useNavigate();
   const { recentlyPlayed, likedSongs, playSong } = usePlayer();
 
-  const [sections, setSections] = useState({});   // key → songs[]  or  albums[]
-  const [featuredCovers, setFeaturedCovers] = useState({}); // playlist id → image
+  // JioSaavn live data
+  const [homepageData, setHomepageData] = useState(null);
+  const [sections, setSections] = useState({});
   const [loading, setLoading] = useState(true);
+  const [dailyMixes, setDailyMixes] = useState(() => {
+    try {
+      const cached = localStorage.getItem('beatbox_daily_mixes');
+      return cached ? JSON.parse(cached) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  useEffect(() => {
+    async function loadMixes() {
+      try {
+        const mixes = await getDailyMixes(recentlyPlayed, likedSongs);
+        setDailyMixes(mixes);
+        localStorage.setItem('beatbox_daily_mixes', JSON.stringify(mixes));
+      } catch (err) {
+        console.warn('[Home] Failed to generate daily mixes:', err);
+      }
+    }
+    loadMixes();
+  }, [recentlyPlayed.length, likedSongs.length]);
   const mountedRef = useRef(true);
 
   // Build taste profile from user history
@@ -61,20 +68,76 @@ export default function Home() {
     [recentlyPlayed.length, likedSongs.length] // eslint-disable-line react-hooks/exhaustive-deps
   );
 
-  // Get personalised sections list (changes based on profile)
+  // Get personalised sections list
   const allSections = useMemo(
     () => getPersonalisedSections(tasteProfile),
     [tasteProfile] // eslint-disable-line react-hooks/exhaustive-deps
   );
 
-  // ── Load sections (priority: first 4 quick, rest lazy) ──
+  // ── Fetch JioSaavn Tamil Homepage ──
   useEffect(() => {
     mountedRef.current = true;
-    setSections({});
     setLoading(true);
 
-    const priority = allSections.slice(0, 4);
-    const rest = allSections.slice(4);
+    async function loadHomepage() {
+      try {
+        const data = await getHomepageData('tamil');
+        
+        let extraAlbums = [];
+        try {
+          // Fetch a large pool of extra popular Tamil albums
+          const [s1, s2, s3, s4, s5, s6, s7, s8] = await Promise.all([
+            searchAlbums('tamil hits 2026', 30),
+            searchAlbums('tamil hits 2025', 30),
+            searchAlbums('tamil hits 2024', 30),
+            searchAlbums('tamil romance', 30),
+            searchAlbums('ar rahman tamil', 30),
+            searchAlbums('anirudh tamil', 30),
+            searchAlbums('yuvan shankar raja tamil', 30),
+            searchAlbums('tamil new releases', 30)
+          ]);
+          extraAlbums = [
+            ...(s1?.results || []),
+            ...(s2?.results || []),
+            ...(s3?.results || []),
+            ...(s4?.results || []),
+            ...(s5?.results || []),
+            ...(s6?.results || []),
+            ...(s7?.results || []),
+            ...(s8?.results || [])
+          ];
+        } catch (e) {
+          console.warn('[Home] Extra albums fetch failed:', e);
+        }
+
+        if (mountedRef.current) {
+          // Merge homepage albums and search albums, removing duplicates
+          const mergedAlbums = [...(data?.newAlbums || [])];
+          extraAlbums.forEach(ea => {
+            if (!mergedAlbums.some(a => a.id === ea.id)) {
+              mergedAlbums.push(ea);
+            }
+          });
+
+          setHomepageData({
+            ...data,
+            newAlbums: mergedAlbums
+          });
+          setLoading(false);
+        }
+      } catch (err) {
+        console.warn('[Home] Homepage fetch failed:', err.message);
+        if (mountedRef.current) setLoading(false);
+      }
+    }
+
+    loadHomepage();
+    return () => { mountedRef.current = false; };
+  }, []);
+
+  // ── Load personalised + search-based sections (lazy) ──
+  useEffect(() => {
+    mountedRef.current = true;
     const preferredLang = tasteProfile?.topLanguage || 'tamil';
 
     async function fetchSection(section) {
@@ -97,54 +160,21 @@ export default function Home() {
       }
     }
 
-    async function loadAll() {
-      // Priority batch — sequential for reliability
-      for (const s of priority) {
+    // Load sections after homepage data (lower priority)
+    async function loadAllSections() {
+      // Small delay to let homepage render first
+      await new Promise(r => setTimeout(r, 500));
+
+      for (let i = 0; i < allSections.length; i += 2) {
         if (!mountedRef.current) return;
-        await fetchSection(s);
-        // Small delay to prevent rate limiting
-        await new Promise(r => setTimeout(r, 300));
-      }
-      if (mountedRef.current) setLoading(false);
-
-      // Lazy-load the rest in parallel batches of 2 (smaller batches to be safe)
-      for (let i = 0; i < rest.length; i += 2) {
-        if (!mountedRef.current) return;
-        await Promise.all(rest.slice(i, i + 2).map(fetchSection));
-        // Delay between batches
-        await new Promise(r => setTimeout(r, 500));
-      }
-    }
-
-    loadAll();
-
-    return () => { mountedRef.current = false; };
-  }, [allSections.map(s => s.key).join(',')]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // ── Load featured playlist covers (real album art from API) ──
-  useEffect(() => {
-    let mounted = true;
-    async function loadCovers() {
-      for (let i = 0; i < FEATURED_PLAYLISTS.length; i += 2) {
-        if (!mounted) break;
-        await Promise.all(
-          FEATURED_PLAYLISTS.slice(i, i + 2).map(async (pl) => {
-            try {
-              const data = await searchAlbums(pl.query, 1);
-              const first = data?.results?.[0];
-              if (mounted && first?.image) {
-                setFeaturedCovers(prev => ({ ...prev, [pl.id]: first.image }));
-              }
-            } catch {}
-          })
-        );
-        // Delay to prevent 429
+        await Promise.all(allSections.slice(i, i + 2).map(fetchSection));
         await new Promise(r => setTimeout(r, 400));
       }
     }
-    loadCovers();
-    return () => { mounted = false; };
-  }, []);
+
+    loadAllSections();
+    return () => { mountedRef.current = false; };
+  }, [allSections.map(s => s.key).join(',')]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const quickPicks = recentlyPlayed.slice(0, 6);
   const hasProfile = !!tasteProfile && tasteProfile.totalSongs >= 3;
@@ -153,8 +183,20 @@ export default function Home() {
     if (album?.id) navigate(`/album/${album.id}`);
   };
 
+  const handlePlaylistClick = (playlist) => {
+    if (playlist?.id) navigate(`/playlist/${playlist.id}`);
+  };
+
+  // Extract live data
+  const newAlbums = homepageData?.newAlbums || [];
+  const featuredPlaylists = homepageData?.playlists || [];
+  const charts = homepageData?.charts || [];
+  const trending = homepageData?.trending || [];
+  const genres = homepageData?.genres || [];
+
   return (
     <div className="home" id="home-page">
+      <Stories />
 
       {/* ── Greeting ── */}
       <h2 className="home__greeting">{getGreeting()}</h2>
@@ -196,46 +238,235 @@ export default function Home() {
         <p className="home__hero-subtitle">
           {hasProfile
             ? `Based on your taste — ${tasteProfile.topArtists.slice(0, 2).map(a => a.split(' ').map(w => w[0].toUpperCase() + w.slice(1)).join(' ')).join(', ')} & more.`
-            : 'Stream 320kbps Tamil hits — Anirudh, A.R. Rahman & more. Ad-free!'}
+            : 'Stream 320kbps Tamil hits — powered by JioSaavn. Ad-free!'}
         </p>
       </div>
 
-      {/* ── Featured Playlists (Spotify-style album grid) ── */}
-      <div className="home__section">
-        <SectionHeader title="🎵 Featured Albums" />
-        <div className="home__playlist-grid">
-          {FEATURED_PLAYLISTS.map((pl) => {
-            const rawImage = featuredCovers[pl.id];
-            const cover = rawImage ? getHighQualityImage(rawImage) : '';
-            return (
-              <div
-                key={pl.id}
-                className="spotify-card"
-                onClick={() => navigate(`/category/${encodeURIComponent(pl.query)}`, {
-                  state: { title: pl.title, useAlbums: true }
-                })}
-              >
-                <div className="spotify-card__img-container">
-                  {cover ? (
-                    <img src={cover} alt={pl.title} className="spotify-card__img" loading="lazy" />
-                  ) : (
-                    <div className="spotify-card__placeholder"><span>🎵</span></div>
-                  )}
-                  <div className="spotify-card__play">
-                    <span style={{ marginLeft: '4px', fontSize: '18px' }}>▶</span>
+      {loading && !homepageData && <Loader />}
+
+      {/* ── ✨ Made For You (Personalized Daily Mixes) ── */}
+      {dailyMixes.length > 0 && (
+        <div className="home__section" id="daily-mixes-section">
+          <SectionHeader title="✨ Made For You" />
+          <div className="home__playlist-grid">
+            {dailyMixes.map((mix, i) => {
+              const cover = getHighQualityImage(mix.image);
+              return (
+                <LiquidCard
+                  key={mix.id}
+                  onClick={() => handlePlaylistClick(mix)}
+                >
+                  <div className="spotify-card daily-mix-card" style={{ background: mix.gradient, border: '1px solid rgba(255, 255, 255, 0.1)', padding: '16px', borderRadius: '16px' }}>
+                    <div className="spotify-card__img-container">
+                      {cover ? (
+                        <img src={cover} alt={mix.title} className="spotify-card__img" loading="lazy" />
+                      ) : (
+                        <div className="spotify-card__placeholder"><span>🎛️</span></div>
+                      )}
+                      <div className="spotify-card__play">
+                        <span style={{ marginLeft: '4px', fontSize: '18px' }}>▶</span>
+                      </div>
+                    </div>
+                    <h4 className="spotify-card__title" style={{ textShadow: '0 2px 10px rgba(0,0,0,0.5)', marginTop: '12px' }}>
+                      {decodeHTML(mix.title)}
+                    </h4>
+                    <p className="spotify-card__desc" style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.85rem' }}>
+                      {mix.subtitle}
+                    </p>
                   </div>
-                </div>
-                <h4 className="spotify-card__title">{pl.title}</h4>
-                <p className="spotify-card__desc">{pl.desc}</p>
-              </div>
-            );
-          })}
+                </LiquidCard>
+              );
+            })}
+          </div>
         </div>
-      </div>
+      )}
 
-      {loading && Object.keys(sections).length === 0 && <Loader />}
+      {/* ══════════ LIVE JIOSAAVN SECTIONS ══════════ */}
 
-      {/* ── Dynamic Sections (Albums + Songs) ── */}
+      {/* ── 🔥 Trending Now (from JioSaavn homepage — like "You Might Like") ── */}
+      {trending.length > 0 && (
+        <div className="home__section">
+          <SectionHeader title="🔥 Trending Now" />
+          <div className="home__grid">
+            {trending.filter(s => s).slice(0, 14).map((item, i) => {
+              if (item.type === 'song') {
+                return (
+                  <SongCard
+                    key={`${item.id}-t-${i}`}
+                    song={item}
+                    queue={trending.filter(s => s?.type === 'song')}
+                    index={i}
+                    style={{ animationDelay: `${i * 40}ms` }}
+                  />
+                );
+              }
+              // Playlist / album type
+              const cover = getHighQualityImage(item.image);
+              return (
+                <LiquidCard
+                  key={`${item.id}-t-${i}`}
+                  onClick={() => item.type === 'playlist' ? handlePlaylistClick(item) : handleAlbumClick(item)}
+                  style={{ animationDelay: `${i * 40}ms` }}
+                >
+                  <div className="spotify-card">
+                    <div className="spotify-card__img-container">
+                      {cover ? (
+                        <img src={cover} alt={item.title} className="spotify-card__img" loading="lazy" />
+                      ) : (
+                        <div className="spotify-card__placeholder"><span>🎵</span></div>
+                      )}
+                      <div className="spotify-card__play">
+                        <span style={{ marginLeft: '4px', fontSize: '18px' }}>▶</span>
+                      </div>
+                    </div>
+                    <h4 className="spotify-card__title">{decodeHTML(item.title || item.name)}</h4>
+                    <p className="spotify-card__desc">
+                      {item.primaryArtists || item.subtitle || item.followerCount ? `${Number(item.followerCount || 0).toLocaleString()} Fans` : ''}
+                    </p>
+                  </div>
+                </LiquidCard>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* ── 🆕 New & Popular Tamil Albums ── */}
+      {newAlbums.length > 0 && (
+        <div className="home__section">
+          <SectionHeader title="🆕 New & Popular Tamil Albums" />
+          <div className="home__grid">
+            {newAlbums.slice(0, 80).map((item, i) => (
+              <AlbumCard
+                key={`${item.id}-${i}`}
+                album={item}
+                onClick={item.type === 'song' 
+                  ? () => playSong(item)
+                  : handleAlbumClick
+                }
+                style={{ animationDelay: `${i * 40}ms` }}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ── 📊 Top Charts (from JioSaavn) ── */}
+      {charts.length > 0 && (
+        <div className="home__section">
+          <SectionHeader title="📊 Top Charts" />
+          <div className="home__playlist-grid">
+            {charts.map((chart) => {
+              const cover = getHighQualityImage(chart.image);
+              return (
+                <LiquidCard
+                  key={chart.id}
+                  onClick={() => handlePlaylistClick(chart)}
+                >
+                  <div className="spotify-card">
+                    <div className="spotify-card__img-container">
+                      {cover ? (
+                        <img src={cover} alt={chart.title} className="spotify-card__img" loading="lazy" />
+                      ) : (
+                        <div className="spotify-card__placeholder"><span>📊</span></div>
+                      )}
+                      <div className="spotify-card__play">
+                        <span style={{ marginLeft: '4px', fontSize: '18px' }}>▶</span>
+                      </div>
+                    </div>
+                    <h4 className="spotify-card__title">{decodeHTML(chart.title)}</h4>
+                    <p className="spotify-card__desc">{chart.subtitle || 'JioSaavn Chart'}</p>
+                  </div>
+                </LiquidCard>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* ── 🎵 Featured Tamil Playlists (from JioSaavn) ── */}
+      {featuredPlaylists.length > 0 && (
+        <div className="home__section">
+          <SectionHeader title="🎵 Featured Playlists" />
+          <div className="home__playlist-grid">
+            {featuredPlaylists.slice(0, 20).map((pl) => {
+              const cover = getHighQualityImage(pl.image);
+              return (
+                <LiquidCard
+                  key={pl.id}
+                  onClick={() => handlePlaylistClick(pl)}
+                >
+                  <div className="spotify-card">
+                    <div className="spotify-card__img-container">
+                      {cover ? (
+                        <img src={cover} alt={pl.title} className="spotify-card__img" loading="lazy" />
+                      ) : (
+                        <div className="spotify-card__placeholder"><span>🎵</span></div>
+                      )}
+                      <div className="spotify-card__play">
+                        <span style={{ marginLeft: '4px', fontSize: '18px' }}>▶</span>
+                      </div>
+                    </div>
+                    <h4 className="spotify-card__title">{decodeHTML(pl.title)}</h4>
+                    <p className="spotify-card__desc">
+                      {pl.followerCount ? `${Number(pl.followerCount).toLocaleString()} Followers` : pl.subtitle || 'JioSaavn Playlist'}
+                    </p>
+                  </div>
+                </LiquidCard>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* ── 🎭 Browse by Genre ── */}
+      {genres.length > 0 && (
+        <div className="home__section">
+          <SectionHeader title="🎭 Browse by Genre" />
+          <div className="home__genre-grid">
+            {genres.map((genre) => {
+              // Simple Tamil search queries that JioSaavn API actually returns results for
+              const getOptimizedQuery = (title) => {
+                const t = (title || '').toLowerCase();
+                if (t.includes('romance') || t.includes('love')) return 'tamil love';
+                if (t.includes('dance')) return 'tamil kuthu';
+                if (t.includes('workout') || t.includes('gym')) return 'tamil mass';
+                if (t.includes('happy')) return 'tamil melody';
+                if (t.includes('chill') || t.includes('relax')) return 'tamil unplugged';
+                if (t.includes('party')) return 'tamil party';
+                if (t.includes('retro') || t.includes('classic')) return 'tamil 90s';
+                if (t.includes('1990') || t.includes('90s')) return 'tamil 90s';
+                if (t.includes('2000') || t.includes('00s')) return 'tamil 2000';
+                if (t.includes('2010')) return 'tamil 2010';
+                if (t.includes('2020')) return 'tamil 2020';
+                if (t.includes('2021')) return 'tamil 2021';
+                if (t.includes('2022')) return 'tamil 2022';
+                if (t.includes('best of')) return `tamil ${t.replace('best of', '').trim()}`;
+                return `tamil ${t}`;
+              };
+
+              return (
+                <div
+                  key={genre.title}
+                  className="genre-card"
+                  onClick={() => {
+                    const optimizedQuery = getOptimizedQuery(genre.title);
+                    navigate(`/category/${encodeURIComponent(optimizedQuery)}`, {
+                      state: { title: genre.title, autoPlay: true }
+                    });
+                  }}
+                >
+                  {genre.image && <img src={genre.image} alt={genre.title} className="genre-card__img" loading="lazy" />}
+                  <span className="genre-card__label">{genre.title}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* ══════════ PERSONALISED + SEARCH SECTIONS ══════════ */}
+
       {allSections.map((section) => {
         const sectionData = sections[section.key];
         if (!sectionData || sectionData.items.length === 0) return null;
@@ -246,7 +477,7 @@ export default function Home() {
             key={section.key}
             id={`section-${section.key}`}
           >
-            {section.type === 'album' ? (
+            {sectionData.type === 'album' ? (
               <>
                 <SectionHeader
                   title={section.title}

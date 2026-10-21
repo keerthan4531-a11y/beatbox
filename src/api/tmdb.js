@@ -6,23 +6,43 @@
  * 🔧 FIX: Updated all embed server URLs to currently working domains (May 2025)
  */
 
-const TMDB_BASE = 'https://api.themoviedb.org/3';
-const TMDB_KEY = 'dummy_token_replace_with_your_own';
-const TMDB_API_KEY = 'c45a857c193f6302f2b5061c3b85e743'; // Working public key from GitHub
+const TMDB_API_KEY = 'c45a857c193f6302f2b5061c3b85e743';
 const IMG_BASE = 'https://image.tmdb.org/t/p';
 
-/* ===== Helper ===== */
+// Detect dev mode
+const isDev = typeof window !== 'undefined' && (
+  window.location.hostname === 'localhost' ||
+  window.location.hostname === '127.0.0.1'
+);
+
+// TMDB API supports CORS natively — no proxy needed
+const TMDB_BASE = 'https://api.themoviedb.org/3';
+
+/* ===== Helper — Fetches TMDB data through proxy ===== */
 export async function tmdbFetch(endpoint, params = {}) {
-  const url = new URL(`${TMDB_BASE}${endpoint}`);
-  url.searchParams.set('api_key', TMDB_API_KEY);
-  Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
+  const searchParams = new URLSearchParams({ api_key: TMDB_API_KEY, ...params });
+  const fullUrl = `${TMDB_BASE}${endpoint}?${searchParams.toString()}`;
 
   try {
-    const res = await fetch(url.toString());
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 12000);
+    const res = await fetch(fullUrl, { signal: controller.signal });
+    clearTimeout(timeout);
+    
     if (!res.ok) throw new Error(`TMDB Error: ${res.status}`);
     return await res.json();
   } catch (error) {
     console.error(`[TMDB] ${endpoint}:`, error);
+    // Fallback: If primary worker fails, try direct (might work in some browsers)
+    if (!isDev && !fullUrl.includes('api.themoviedb.org')) {
+      try {
+        const directUrl = `https://api.themoviedb.org/3${endpoint}?${searchParams.toString()}`;
+        const res2 = await fetch(directUrl);
+        if (res2.ok) return await res2.json();
+      } catch (e2) {
+        console.warn('[TMDB] Direct fallback also failed');
+      }
+    }
     throw error;
   }
 }

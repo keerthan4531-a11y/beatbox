@@ -1,11 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { IoPlay, IoPause, IoHeart, IoHeartOutline } from 'react-icons/io5';
 import { usePlayer } from '../../context/PlayerContext';
 import { getHighQualityImage, decodeHTML, getArtistNames } from '../../utils/helpers';
+import LiquidCard from '../LiquidUI/LiquidCard';
+import HeartExplosion from '../LiquidUI/HeartExplosion';
 import './SongCard.css';
 
 export default function SongCard({ song, queue, index, style }) {
   const { playSong, currentSong, isPlaying, togglePlay, toggleLike, isLiked } = usePlayer();
+  const [explosionActive, setExplosionActive] = useState(false);
 
   if (!song) return null;
 
@@ -24,50 +27,57 @@ export default function SongCard({ song, queue, index, style }) {
   const handleLike = (e) => {
     e.stopPropagation();
     toggleLike(song);
+    if (!liked) {
+      setExplosionActive(true);
+    }
   };
 
   return (
-    <div
-      className="song-card"
+    <LiquidCard
       onClick={handlePlay}
       style={style}
-      id={`song-card-${song.id}`}
     >
-      <div className="song-card__image-wrapper">
-        <img
-          className="song-card__image"
-          src={getHighQualityImage(song.image)}
-          alt={decodeHTML(song.name)}
-          loading="lazy"
-        />
-        <button
-          className="song-card__play-btn"
-          onClick={handlePlay}
-          aria-label={isCurrentSong && isPlaying ? 'Pause' : 'Play'}
-        >
-          {isCurrentSong && isPlaying ? <IoPause /> : <IoPlay />}
-        </button>
-      </div>
-
-      <button
-        className={`song-card__like-btn ${liked ? 'liked' : ''}`}
-        onClick={handleLike}
-        aria-label={liked ? 'Unlike' : 'Like'}
+      <div
+        className="song-card"
+        id={`song-card-${song.id}`}
       >
-        {liked ? <IoHeart /> : <IoHeartOutline />}
-      </button>
+        <div className="song-card__image-wrapper">
+          <img
+            className="song-card__image"
+            src={getHighQualityImage(song.image)}
+            alt={decodeHTML(song.name)}
+            loading="lazy"
+          />
+          <button
+            className="song-card__play-btn"
+            onClick={handlePlay}
+            aria-label={isCurrentSong && isPlaying ? 'Pause' : 'Play'}
+          >
+            {isCurrentSong && isPlaying ? <IoPause /> : <IoPlay />}
+          </button>
+        </div>
 
-      <div className="song-card__title-row">
-        {isCurrentSong && isPlaying && (
-          <div className="song-card__playing">
-            <div className="song-card__playing-bar" style={{ height: 6 }} />
-            <div className="song-card__playing-bar" style={{ height: 10 }} />
-            <div className="song-card__playing-bar" style={{ height: 4 }} />
-          </div>
-        )}
-        <div className="song-card__title">{decodeHTML(song.name)}</div>
+        <button
+          className={`song-card__like-btn ${liked ? 'liked' : ''}`}
+          onClick={handleLike}
+          aria-label={liked ? 'Unlike' : 'Like'}
+        >
+          <HeartExplosion active={explosionActive} onComplete={() => setExplosionActive(false)} />
+          {liked ? <IoHeart /> : <IoHeartOutline />}
+        </button>
+
+        <div className="song-card__title-row">
+          {isCurrentSong && isPlaying && (
+            <div className="song-card__playing">
+              <div className="song-card__playing-bar" style={{ height: 6 }} />
+              <div className="song-card__playing-bar" style={{ height: 10 }} />
+              <div className="song-card__playing-bar" style={{ height: 4 }} />
+            </div>
+          )}
+          <div className="song-card__title">{decodeHTML(song.name)}</div>
+        </div>
+        <div className="song-card__subtitle">{getArtistNames(song.artists, song.primaryArtists)}</div>
       </div>
-      <div className="song-card__subtitle">{getArtistNames(song.artists, song.primaryArtists)}</div>
-    </div>
+    </LiquidCard>
   );
 }
